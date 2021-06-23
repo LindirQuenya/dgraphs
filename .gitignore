@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Random files that I don't think I'll need.
+dll.conf.bak
+subplots.py
