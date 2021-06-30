@@ -21,12 +21,16 @@ Generate a graph that compares two variables for a given mission concept.
   -h, --help     display this message
 
   STUDY          one of [habex, luvoir, luvoiralt]
-  COMPARISON     integer, [0..3] such that:
+  COMPARISON     integer, [0..3] such that: (x vs y)
                           0 -> N_oplus   vs d
                           1 -> eta_oplus vs d
                           2 -> d         vs N_oplus
                           3 -> d         vs duration
-                          4 -> N_oplus   vs duration
+                          4 -> N_oplus   vs duration (Not Implemented)
+                          5 -> IWA       vs N_oplus  (Broken)
+                          6 -> SNR0      vs N_oplus  (Not Implemented)
+                          7 -> duration  vs N_oplus  (Not Implemented)
+                          8 -> eta_oplus vs N_oplus  (Not Implemented)
 
 If an invalid value is supplied for STUDY, it will
 default to habex.
@@ -148,6 +152,9 @@ def d_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
     innersqrt = np.sqrt(a(1, np.power(d(is_high, is_low), 2)))
     outersqrt = np.sqrt(a(1, innersqrt))
     return m(d(n, np.sqrt(2)), m(cuberoot, outersqrt))
+
+def iwa_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
+    return d(m(3,la),d_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala))
 
 def d_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     cuberoot = np.cbrt(d(3, m(4*pi, m(rhostara, etaeartha))))
@@ -273,16 +280,16 @@ if IWAvNOPLUS:
     noplusvals.append(noplus_intersect)
     noplusvals.sort()
     noplusvals = np.array(noplusvals)
-    titlestr = ' Yield vs. Telescope Diameter, for $\eta_\oplus='+str(float(etaearth))+'$.'
+    titlestr = ' Yield vs. Inner Working Angle, for $\eta_\oplus='+str(float(etaearth))+'$.'
     dvals_p, dvals_pa = d_prior_noplus(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
     dvals_np = d_photon_noprior(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
     ax = plt.figure()
-    # dvals_p=d(m(3,l),dvals_p);dvals_np=d(m(3,l),dvals_np);dvals_pa=d(m(3,l),dvals_pa)
+    dvals_p = d(m(3,l),dvals_p);dvals_pa = d(m(3,l),dvals_pa);dvals_np = d(m(3,l),dvals_np);dvar = d(m(3,l),dvar);
     plt.plot(dvals_p, noplusvals, color='b', label='Prior Knowledge')
     plt.plot(dvals_pa, noplusvals, color='b', linestyle='--')
     plt.plot(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
     plt.plot(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    plt.xlabel('Telescope Diameter (m)'); plt.ylabel('Exo-Earth Yield')
+    plt.xlabel('IWA (rad)'); plt.ylabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
     plt.legend(prop={'size':6}); plt.show()
