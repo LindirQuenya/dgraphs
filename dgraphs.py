@@ -27,7 +27,7 @@ Generate a graph that compares two variables for a given mission concept.
                           2 -> d         vs N_oplus
                           3 -> d         vs duration
                           4 -> N_oplus   vs duration (Not Implemented)
-                          5 -> IWA       vs N_oplus  (Broken)
+                          5 -> IWA       vs N_oplus
                           6 -> SNR0      vs N_oplus  (Not Implemented)
                           7 -> duration  vs N_oplus  (Not Implemented)
                           8 -> eta_oplus vs N_oplus  (Not Implemented)
