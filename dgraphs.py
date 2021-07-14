@@ -183,11 +183,12 @@ def d_prior_noplus(Noplusarr, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
 
 def T_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
     mvar = d(m(16,m(rvala,m(snr0a,snr0a))),m(Ra,m(Ka,epsa)))
+    mvar = m(mvar,np.power(d(3,m(4*pi,rhostara)),2/3))
     nvar = d(m(3,la),avara)
     sigvar = m(3/5,np.power(d(Noplusa,etaeartha),5/3))
     Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
-    #return d(m(mvar,sigvar),m(m(da,da),np.sqrt(np.abs(s(1,np.power(d(m(Dlim,nvar),da),2))))))
-    return d(m(mvar,sigvar),m(m(da,da),np.sqrt(s(1,np.power(d(m(Dlim,nvar),da),2)))))
+    return d(m(mvar,sigvar),m(m(da,da),np.sqrt(np.abs(s(1,np.power(d(m(Dlim,nvar),da),2))))))
+    #return d(m(mvar,sigvar),m(m(da,da),np.sqrt(s(1,np.power(d(m(Dlim,nvar),da),2)))))
 
 def T_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
     front = d(m(m(16,rvala),m(snr0a,snr0a)),m(m(Ra,Ka),m(m(da,da),epsa)))
