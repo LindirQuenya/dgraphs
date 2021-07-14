@@ -39,7 +39,7 @@ the program will display this message and exit.""")
 
 if '-h' in sys.argv or '--help' in sys.argv:
     print_help()
-    exit(0)
+    #exit(0)
 
 HABEX=True
 LUVOIR=False
@@ -63,7 +63,7 @@ if len(sys.argv) > 1:
         exit(1)
 
 
-NOPLUSvD, ETAvD, DvNOPLUS, DvTIME, IWAvNOPLUS = [False]*5
+NOPLUSvD, ETAvD, DvNOPLUS, DvTIME, NOPLUSvT, IWAvNOPLUS, TvNOPLUS = [False]*7
 if len(sys.argv) > 2:
     if '0' == sys.argv[2]:
         NOPLUSvD=True
@@ -73,14 +73,18 @@ if len(sys.argv) > 2:
         DvNOPLUS=True
     elif '3' == sys.argv[2]:
         DvTIME=True
+    elif '4' == sys.argv[2]:
+        NOPLUSvT=True
     elif '5' == sys.argv[2]:
         IWAvNOPLUS=True
+    elif '7' == sys.argv[2]:
+        TvNOPLUS = True
     else:
         print_help()
-        exit(1)
+        #exit(1)
 else:
     print_help()
-    exit(1)
+    #exit(1)
 
 #mp.dps=50
 #mp.prec=171
@@ -176,6 +180,25 @@ def d_prior_noplus(Noplusarr, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
     photonlim = d_photon_prior(Noplusarr[intersect_ind:], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
     photonlim2 = d_photon_prior(Noplusarr[:intersect_ind], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
     return np.concatenate((iwalim, photonlim)), np.concatenate((photonlim2, iwalim2))
+
+def T_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
+    mvar = d(m(16,m(rvala,m(snr0a,snr0a))),m(Ra,m(Ka,epsa)))
+    nvar = d(m(3,la),avara)
+    sigvar = m(3/5,np.power(d(Noplusa,etaeartha),5/3))
+    Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
+    #return d(m(mvar,sigvar),m(m(da,da),np.sqrt(np.abs(s(1,np.power(d(m(Dlim,nvar),da),2))))))
+    return d(m(mvar,sigvar),m(m(da,da),np.sqrt(s(1,np.power(d(m(Dlim,nvar),da),2)))))
+
+def T_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
+    front = d(m(m(16,rvala),m(snr0a,snr0a)),m(m(Ra,Ka),m(m(da,da),epsa)))
+    middle = np.power(d(3,m(4*pi,m(rhostara,etaeartha))),2/3)
+    end = m(3/5,np.power(Noplusa,5/3))
+    return m(front,m(middle,end))
+
+def T_iwa_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
+    top = m(16,m(m(rvala,m(snr0a,snr0a)),m(Noplusa,m(avara,avara))))
+    bottom = m(15,m(m(Ra,Ka),m(epsa,m(la,la))))
+    return d(top,bottom)
 
 if NOPLUSvD:
     noplus_intersect = intersection_prior([], l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
@@ -293,6 +316,30 @@ if IWAvNOPLUS:
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
     plt.legend(prop={'size':6}); plt.show()
+
+if TvNOPLUS:
+    titlestr = ' Yield vs. Survey Duration, for $\eta_\oplus='+str(float(etaearth))+'$.'
+    #noplusvals = list(range(1,1001))
+    noplus_intersect = intersection_prior([], l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
+    NoplusVals = np.concatenate((np.array(range(int(noplus_intersect+1))),
+                                 np.array([noplus_intersect]),
+                                 np.array(range(int(noplus_intersect+1), int(8*noplus_intersect)))))
+    tvals_p_pho = T_photon_prior(np.array(range(int(noplus_intersect+1))), l, avar, rhostar,
+                                 etaearth, snr0, R, K, eps, dvar, iwafac, rval)
+    tvals_p_iwa = T_iwa_prior(np.array(range(int(noplus_intersect+1), int(8*noplus_intersect))),
+                              l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
+    tvals_np = T_photon_noprior(NoplusVals, l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
+    noplusvals = np.concatenate((np.array(range(int(noplus_intersect+1))),
+                                 np.array(range(int(noplus_intersect+1), int(8*noplus_intersect)))))
+    tvals_p = np.concatenate((tvals_p_pho,tvals_p_iwa))
+    ax = plt.figure()
+    plt.plot(noplusvals,tvals_p, color='b', label='Prior Knowledge')
+    plt.plot( NoplusVals, tvals_np, color='r', label='No Prior Knowledge')
+    plt.plot(Noplus,T, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    plt.ylabel('Survey duration (seconds)'); plt.xlabel('Exo-Earth Yield')
+    plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    plt.legend(prop={'size':6}); plt.show()
+
 
 # Sources: HabEx
 # l:              (HabEx Final Report 3-6) (Standards Team Final Report Table 5)
