@@ -28,8 +28,9 @@ Generate a graph that compares two variables for a given mission concept.
                           3 -> d         vs duration
                           4 -> eta_oplus vs N_oplus  (Not Implemented)
                           5 -> IWA       vs N_oplus
-                          6 -> SNR0      vs N_oplus  (Not Implemented)
+                          6 -> SNR0      vs N_oplus
                           7 -> N_oplus   vs duration
+                          8 -> eta_oplus vs duration
 
 If an invalid value is supplied for STUDY, it will
 default to habex.
@@ -62,7 +63,7 @@ if len(sys.argv) > 1:
         exit(1)
 
 
-NOPLUSvD, ETAvD, DvNOPLUS, DvTIME, NOPLUSvT, IWAvNOPLUS, NOPLUSvT = [False]*7
+NOPLUSvD, ETAvD, DvNOPLUS, DvTIME, ETAvNOPLUS, IWAvNOPLUS, SNR0vNOPLUS, NOPLUSvT, ETAvT = [False]*9
 if len(sys.argv) > 2:
     if '0' == sys.argv[2]:
         NOPLUSvD=True
@@ -73,11 +74,15 @@ if len(sys.argv) > 2:
     elif '3' == sys.argv[2]:
         DvTIME=True
     elif '4' == sys.argv[2]:
-        NOPLUSvT=True
+        ETAvNOPLUS=True
     elif '5' == sys.argv[2]:
         IWAvNOPLUS=True
+    elif '6' == sys.argv[2]:
+        SNR0vNOPLUS=True
     elif '7' == sys.argv[2]:
         NOPLUSvT = True
+    elif '8' == sys.argv[2]:
+        ETAvT = True
     else:
         print_help()
         #exit(1)
@@ -196,6 +201,35 @@ def T_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa,
     return m(front,m(middle,end))
 
 T_iwa_prior=T_photon_prior
+
+def get_sc(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
+    Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
+    d(m(3,m(Dlim,la)),da)
+
+def get_Noplus_sca(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
+    cubed = np.power(d(m(avara,da),m(3,la)),3)
+    modifier = m(4*pi/3,m(rhostara,etaeartha))
+    return m(cubed, modifier)
+
+def get_etaearth_sca(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
+    cubed = np.power(d(m(3,la),m(avara,da)),3)
+    modifier = d(m(3,Noplusa),m(4*pi,rhostara))
+    return m(cubed, modifier)
+
+def SNR_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
+    Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
+    nvar = d(m(3,la),avara)
+    sq = s(1,np.power(d(m(Dlim,nvar),da),2))
+    extramult=d(m(5,m(m(Ta,Ra),m(Ka,epsa))),m(48,r))
+    fivethirds = np.power(d(etaeartha,Noplusa),5/3)
+    twothirds = np.power(d(m(4*pi,rhostara),3),2/3)
+    return np.sqrt(m(m(sq, extramult),m(fivethirds, twothirds)))
+
+def SNR_photon_prior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
+    top=m(m(5,Ta),m(m(Ra,Ka),m(np.power(da,2),epsa)))
+    bottom=m(48,m(r,np.power(Noplusa,5/3)))
+    twothirds = np.power(d(m(4*pi,m(rhostara,etaeartha)),3),2/3)
+    return m(d(top, bottom),twothirds)
 
 #WRONG!
 #def T_iwa_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
@@ -322,27 +356,68 @@ if IWAvNOPLUS:
 
 if NOPLUSvT:
     titlestr = ' Yield vs. Survey Duration, for $\eta_\oplus='+str(float(etaearth))+'$.'
+    noplus_limit = get_Noplus_sca([], l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
+    noplusvals = list(range(1,int(noplus_limit)-2))
+    #Aggressively sample near the asymptote, to give it better clarity.
+    nearval = np.linspace(int(noplus_limit)-2, noplus_limit, 1000)[0:999]
+    noplusvals = np.concatenate((noplusvals, nearval))
+    tvals_p = T_photon_prior(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
+    tvals_np = T_photon_noprior(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
     #noplusvals = list(range(1,1001))
-    noplus_intersect = intersection_prior([], l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
-    NoplusVals = np.concatenate((np.array(range(int(noplus_intersect+1))),
-                                 np.array([noplus_intersect]),
-                                 np.array(range(int(noplus_intersect+1), int(8*noplus_intersect)))))
-    tvals_p_pho = T_photon_prior(np.array(range(int(noplus_intersect+1))), l, avar, rhostar,
-                                 etaearth, snr0, R, K, eps, dvar, iwafac, rval)
-    tvals_p_iwa = T_iwa_prior(np.array(range(int(noplus_intersect+1), int(8*noplus_intersect))),
-                              l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
-    tvals_np = T_photon_noprior(NoplusVals, l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
-    noplusvals = np.concatenate((np.array(range(int(noplus_intersect+1))),
-                                 np.array(range(int(noplus_intersect+1), int(8*noplus_intersect)))))
-    tvals_p = np.concatenate((tvals_p_pho,tvals_p_iwa))
+    #noplus_intersect = intersection_prior([], l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
+    #NoplusVals = np.concatenate((np.array(range(int(noplus_intersect+1))),
+    #                             np.array([noplus_intersect]),
+    #                             np.array(range(int(noplus_intersect+1), int(8*noplus_intersect)))))
+    #tvals_p_pho = T_photon_prior(np.array(range(int(noplus_intersect+1))), l, avar, rhostar,
+    #                             etaearth, snr0, R, K, eps, dvar, iwafac, rval)
+    #tvals_p_iwa = T_iwa_prior(np.array(range(int(noplus_intersect+1), int(8*noplus_intersect))),
+    #                          l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
+    #tvals_np = T_photon_noprior(NoplusVals, l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
+    #noplusvals = np.concatenate((np.array(range(int(noplus_intersect+1))),
+    #                             np.array(range(int(noplus_intersect+1), int(8*noplus_intersect)))))
+    #tvals_p = np.concatenate((tvals_p_pho,tvals_p_iwa))
     ax = plt.figure()
     plt.loglog(noplusvals,tvals_p, color='b', label='Prior Knowledge')
-    plt.loglog( NoplusVals, tvals_np, color='r', label='No Prior Knowledge')
+    plt.loglog(noplusvals, tvals_np, color='r', label='No Prior Knowledge')
+    plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
     plt.plot(Noplus,T, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Survey duration (seconds)'); plt.xlabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     plt.legend(prop={'size':6}); plt.show()
 
+if ETAvT:
+    titlestr = ' Yield vs. $\eta_\oplus$'
+    minetaval = get_etaearth_sca(Noplus, l, avar, rhostar, [], snr0, R, K, eps, dvar, iwafac, rval)
+    etavals = np.linspace(minetaval,1,1000)[1:999]
+    tvals_p = T_photon_prior(Noplus, l, avar, rhostar, etavals, snr0, R, K, eps, dvar, iwafac, rval)
+    tvals_np = T_photon_noprior(Noplus, l, avar, rhostar, etavals, snr0, R, K, eps, dvar, iwafac, rval)
+    ax = plt.figure()
+    plt.xlim([0,1])
+    plt.semilogy(etavals,tvals_p, color='b', label='Prior Knowledge')
+    plt.semilogy(etavals, tvals_np, color='r', label='No Prior Knowledge')
+    plt.axvline(x=minetaval, color='y', linestyle='--',label='$s_c=a$ limit on $\eta_\oplus$')
+    plt.plot(etaearth,T, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    plt.ylabel('Survey duration (seconds)'); plt.xlabel('$\eta_\oplus$')
+    plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    plt.legend(prop={'size':6}); plt.show()
+
+if SNR0vNOPLUS:
+    titlestr = ' $SNR_0$ vs $N_\oplus$'
+    noplus_limit = get_Noplus_sca([], l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
+    noplusvals = list(range(1,int(noplus_limit)-2))
+    #Aggressively sample near the asymptote, to give it better clarity.
+    nearval = np.linspace(int(noplus_limit)-2, noplus_limit, 1000)[0:999]
+    noplusvals = np.concatenate((noplusvals, nearval))
+    snrvals_p = SNR_photon_prior(noplusvals, l, avar, rhostar, etaearth, dvar, R, K, eps, T, iwafac, rval)
+    snrvals_np = SNR_photon_noprior(noplusvals, l, avar, rhostar, etaearth, dvar, R, K, eps, T, iwafac, rval)
+    ax = plt.figure()
+    plt.semilogy(noplusvals, snrvals_p, color='b', label='Prior Knowledge')
+    plt.semilogy(noplusvals, snrvals_np, color='r', label='No Prior Knowledge')
+    plt.plot(Noplus,snr0, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    plt.ylabel('$SNR_0$'); plt.xlabel('Exo-Earth Yield')
+    plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    plt.legend(prop={'size':6}); plt.show()
+    
 
 # Sources: HabEx
 # l:              (HabEx Final Report 3-6) (Standards Team Final Report Table 5)
