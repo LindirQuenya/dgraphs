@@ -8,14 +8,14 @@ import os
 
 # First one uses script location, second uses cwd. Comment/uncomment to taste.
 mpl.rcParams["savefig.directory"] = os.chdir(os.path.dirname(__file__))
-# mpl.rcParams["savefig.directory"] = ""
+#mpl.rcParams["savefig.directory"] = ""
 
 # The following specifies that titles should be on/off for figures.
 TITLES=False
 
 def print_help():
     print("""
-Usage: python3 dgraphs.py [STUDY] [COMPARISON]
+Usage: python3 dgraphs.py <STUDY> <COMPARISON> [GRAPHTYPE]
 Generate a graph that compares two variables for a given mission concept.
 
   -h, --help     display this message
@@ -25,17 +25,24 @@ Generate a graph that compares two variables for a given mission concept.
                           0 -> N_oplus   vs d
                           1 -> eta_oplus vs d
                           2 -> d         vs N_oplus
-                          3 -> d         vs duration
+                          3 -> duration  vs d
                           4 -> eta_oplus vs N_oplus  (Not Implemented)
                           5 -> IWA       vs N_oplus
-                          6 -> SNR0      vs N_oplus
+                          6 -> N_oplus   vs SNR0
                           7 -> N_oplus   vs duration
                           8 -> eta_oplus vs duration
+  GRAPHTYPE      one of [linear, logy, logx, loglog]
 
 If an invalid value is supplied for STUDY, it will
 default to habex.
+
 If an invalid value is supplied for COMPARISON,
-the program will display this message and exit.""")
+the program will display this message and exit.
+
+If GRAPHTYPE is not supplied or an invalid value
+is supplied for GRAPHTYPE, the default will depend
+on COMPARISON.
+""")
 
 if '-h' in sys.argv or '--help' in sys.argv:
     print_help()
@@ -90,6 +97,21 @@ else:
     print_help()
     #exit(1)
 
+LINEAR, LOGY, LOGX, LOGLOG, UNSET = [False]*5
+if len(sys.argv) > 3:
+    if 'linear' == sys.argv[3]:
+        LINEAR=True
+    elif 'logy' == sys.argv[3]:
+        LOGY=True
+    elif 'logx' == sys.argv[3]:
+        LOGX=True
+    elif 'loglog' == sys.argv[3]:
+        LOGLOG=True
+    else:
+        UNSET=True
+        print_help()
+else:
+    UNSET=True
 #mp.dps=50
 #mp.prec=171
 
@@ -171,18 +193,34 @@ def d_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa,
 
 def d_iwa_all(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     cuberoot = np.cbrt(d(m(3, Noplusa), m(4*pi, m(rhostara, etaeartha))))
+    if type(Ta)==np.ndarray:
+        return np.array([m(d(m(iwafaca, la), avara), cuberoot) for x in Ta])
     return m(d(m(iwafaca, la), avara), cuberoot)
-
 def intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     return m(m(5/48, np.power(iwafaca, 2)), d(m(Ra, m(Ka, m(Ta, m(epsa, np.power(la, 2))))), m(rvala, np.power(m(snr0a, avara), 2))))
 
 def d_prior_noplus(Noplusarr, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
-    noplus_intersecta = intersection_prior([], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
-    intersect_ind = int(np.where(Noplusarr == noplus_intersecta)[0])
+    noplus_intersecta = np.array([intersection_prior([], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)])
+    #print(Noplusarr.shape)
+    intersect_ind = int(np.where(np.isclose(Noplusarr,noplus_intersecta))[0])
     iwalim = d_iwa_all(Noplusarr[:intersect_ind], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
     iwalim2 = d_iwa_all(Noplusarr[intersect_ind:], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
     photonlim = d_photon_prior(Noplusarr[intersect_ind:], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
     photonlim2 = d_photon_prior(Noplusarr[:intersect_ind], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
+    return np.concatenate((iwalim, photonlim)), np.concatenate((photonlim2, iwalim2))
+
+def T_intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
+    return d(m(Noplusa,m(m(16/5, rvala), np.power(m(snr0a, avara), 2))), m(m(iwafaca, np.power(la, 2)), m(m(Ra, Ka), epsa)))
+
+def d_prior_T(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr, iwafaca, rvala):
+    T_intersecta = T_intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, [], iwafaca, rvala)
+    #print(Tarr.shape)
+    #print(T_intersecta.shape)
+    intersect_ind =  int(np.where(np.isclose(Tarr,T_intersecta))[0])
+    iwalim = d_iwa_all(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr[:intersect_ind], iwafaca, rvala)
+    iwalim2 = d_iwa_all(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr[intersect_ind:], iwafaca, rvala)
+    photonlim = d_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr[intersect_ind:], iwafaca, rvala)
+    photonlim2 = d_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr[:intersect_ind], iwafaca, rvala)
     return np.concatenate((iwalim, photonlim)), np.concatenate((photonlim2, iwalim2))
 
 def T_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
@@ -246,19 +284,33 @@ if NOPLUSvD:
     dvals_np = d_photon_noprior(NoplusVals, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
 
     ax=plt.figure()  # ; pltfname=HABEX*'HabEx' + LUVOIR*'LUVOIR'+'plt.pickle'
-    if True:
+    if LINEAR:
+        plt.plot(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
+        plt.plot(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
+        plt.plot(NoplusVals[1:], dvals_np[1:], color='r', label='No Prior Knowledge')
+        plt.plot(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
+        plt.figtext(0.135, 0.56, 'IWA-Limited', fontsize=8);plt.figtext(0.54, 0.56, 'Photon-Limited', fontsize=8)
+    elif LOGY:
+        plt.semilogy(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
+        plt.semilogy(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
+        plt.semilogy(NoplusVals[1:], dvals_np[1:], color='r', label='No Prior Knowledge')
+        plt.semilogy(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
+        plt.figtext(0.135, 0.8, 'IWA-Limited', fontsize=8);plt.figtext(0.54, 0.65, 'Photon-Limited', fontsize=8)
+    elif LOGX or UNSET:
         plt.semilogx(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
         plt.semilogx(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
         plt.semilogx(NoplusVals[1:], dvals_np[1:], color='r', label='No Prior Knowledge')
         plt.semilogx(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
-    else:
+        plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
+    elif LOGLOG:
         plt.loglog(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
         plt.loglog(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
         plt.loglog(NoplusVals[1:], dvals_np[1:], color='r', label='No Prior Knowledge')
         plt.loglog(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
+        plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
     # plt.axvline(x=Noplus, color='g', linestyle='--', label=HABEX*'HabEx' + LUVOIR*'LUVOIR'+' Expected Yield')
     plt.axvline(x=noplus_intersect, color='k', linestyle=':', label='IWA-Photon intersection (prior)')
-    plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
+    #plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
     # plt.axhline(y=dvar, color='c', linestyle='--', label=HABEX*'HabEx' + LUVOIR*'LUVOIR'+' Telescope Diameter')
     plt.ylabel('Minimum Telescope Diameter (m)'); plt.xlabel('EEC/HEC Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + 
@@ -279,15 +331,19 @@ if ETAvD:
         titlestr=' IWA-limited '+titlestr
     dvals_np = d_photon_noprior(Noplus, l, avar, rhostar, etavals, snr0, R, K, eps, T, iwafac, rval)
     ax = plt.figure()
-    if False:
+    if LINEAR:
         plt.plot(etavals, dvals_p, color='b', label='Prior Knowledge')
         plt.plot(etavals, dvals_np, color='r', label='No Prior Knowledge')
         plt.plot(etaearth, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    elif False:
+    elif LOGY:
         plt.semilogy(etavals, dvals_p, color='b', label='Prior Knowledge')
         plt.semilogy(etavals, dvals_np, color='r', label='No Prior Knowledge')
         plt.semilogy(etaearth, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    else:
+    elif LOGX:
+        plt.semilogx(etavals, dvals_p, color='b', label='Prior Knowledge')
+        plt.semilogx(etavals, dvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogx(etaearth, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGLOG or UNSET:
         plt.loglog(etavals, dvals_p, color='b', label='Prior Knowledge')
         plt.loglog(etavals, dvals_np, color='r', label='No Prior Knowledge')
         plt.loglog(etaearth, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
@@ -306,30 +362,69 @@ if DvNOPLUS:
     dvals_p, dvals_pa = d_prior_noplus(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
     dvals_np = d_photon_noprior(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
     ax = plt.figure()
-    plt.plot(dvals_p, noplusvals, color='b', label='Prior Knowledge')
-    plt.plot(dvals_pa, noplusvals, color='b', linestyle='--')
-    plt.plot(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
-    plt.plot(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    if LINEAR or UNSET:
+        plt.plot(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.plot(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.plot(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.plot(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGY:
+        plt.semilogy(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.semilogy(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.semilogy(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.semilogy(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGX:
+        plt.semilogx(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.semilogx(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.semilogx(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.semilogx(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGLOG:
+        plt.loglog(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.loglog(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.loglog(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.loglog(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+
     plt.xlabel('Telescope Diameter (m)'); plt.ylabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
     plt.legend(prop={'size':6}); plt.show()
 
 if DvTIME:
-    timevals = list(np.linspace(0.1*T, 10*T, 1000))
+    tintersect = T_intersection_prior(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, [], iwafac, rval)
+    timevals = list(np.linspace(0.1*tintersect, 10*T, 10000))
+    tval2 = np.linspace(1, 2*tintersect, 1000)
     timevals.append(T)
+    timevals.append(tintersect)
     timevals.sort()
     timevals = np.array(timevals)
+    timevals = np.concatenate([timevals, tval2])
+    timevals = np.sort(timevals)
+    #print(timevals.shape)
     timevalsy = d(timevals, 3600*24*365)
-    titlestr = ' Survey Duration vs. Telescope Diameter, for $\eta_\oplus='+str(float(etaearth))+'$.'
-    dvals_p, dvals_pa = d_prior_noplus(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, timevals, iwafac, rval)
+    titlestr = ' Telescope Diameter vs. Survey Duration, for $\eta_\oplus='+str(float(etaearth))+'$.'
+    dvals_p, dvals_pa = d_prior_T(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, timevals, iwafac, rval)
     dvals_np = d_photon_noprior(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, timevals, iwafac, rval)
     ax = plt.figure()
-    plt.plot(dvals_p, timevals, color='b', label='Prior Knowledge')
-    plt.plot(dvals_pa, timevals, color='b', linestyle='--')
-    plt.plot(dvals_np, timevals, color='r', label='No Prior Knowledge')
-    plt.plot(dvar, T, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    plt.xlabel('Telescope Diameter (m)'); plt.ylabel('Survey Duration (seconds)')
+    if LINEAR or UNSET:
+        plt.plot(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
+        plt.plot(timevalsy, dvals_p, color='b', linestyle='--')
+        plt.plot(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
+        plt.plot(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGY:
+        plt.semilogy(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
+        plt.semilogy(timevalsy, dvals_p, color='b', linestyle='--')
+        plt.semilogy(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogy(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGX:
+        plt.semilogx(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
+        plt.semilogx(timevalsy, dvals_p, color='b', linestyle='--')
+        plt.semilogx(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogx(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGLOG:
+        plt.loglog(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
+        plt.loglog(timevalsy, dvals_p, color='b', linestyle='--')
+        plt.loglog(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
+        plt.loglog(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    plt.ylabel('Telescope Diameter (m)'); plt.xlabel('Survey Duration (years)')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
     plt.legend(prop={'size':6}); plt.show()
@@ -345,10 +440,26 @@ if IWAvNOPLUS:
     dvals_np = d_photon_noprior(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
     ax = plt.figure()
     dvals_p = d(m(3,l),dvals_p);dvals_pa = d(m(3,l),dvals_pa);dvals_np = d(m(3,l),dvals_np);dvar = d(m(3,l),dvar);
-    plt.plot(dvals_p, noplusvals, color='b', label='Prior Knowledge')
-    plt.plot(dvals_pa, noplusvals, color='b', linestyle='--')
-    plt.plot(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
-    plt.plot(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    if LINEAR or UNSET:
+        plt.plot(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.plot(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.plot(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.plot(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGY:
+        plt.semilogy(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.semilogy(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.semilogy(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.semilogy(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGX:
+        plt.semilogx(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.semilogx(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.semilogx(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.semilogx(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGLOG:
+        plt.loglog(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.loglog(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.loglog(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.loglog(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.xlabel('IWA (rad)'); plt.ylabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
@@ -377,11 +488,27 @@ if NOPLUSvT:
     #                             np.array(range(int(noplus_intersect+1), int(8*noplus_intersect)))))
     #tvals_p = np.concatenate((tvals_p_pho,tvals_p_iwa))
     ax = plt.figure()
-    plt.loglog(noplusvals,tvals_p, color='b', label='Prior Knowledge')
-    plt.loglog(noplusvals, tvals_np, color='r', label='No Prior Knowledge')
-    plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
-    plt.plot(Noplus,T, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    plt.ylabel('Survey duration (seconds)'); plt.xlabel('Exo-Earth Yield')
+    if LINEAR:
+        plt.plot(noplusvals, d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
+        plt.plot(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
+        plt.plot(Noplus,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGY:
+        plt.semilogy(noplusvals, d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
+        plt.semilogy(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
+        plt.semilogy(Noplus,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGX:
+        plt.semilogx(noplusvals, d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
+        plt.semilogx(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
+        plt.semilogx(Noplus,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    elif LOGLOG or UNSET:
+        plt.loglog(noplusvals, d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
+        plt.loglog(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
+        plt.loglog(Noplus,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    plt.ylabel('Survey duration (years)'); plt.xlabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     plt.legend(prop={'size':6}); plt.show()
 
@@ -393,11 +520,21 @@ if ETAvT:
     tvals_np = T_photon_noprior(Noplus, l, avar, rhostar, etavals, snr0, R, K, eps, dvar, iwafac, rval)
     ax = plt.figure()
     plt.xlim([0,1])
-    plt.semilogy(etavals,tvals_p, color='b', label='Prior Knowledge')
-    plt.semilogy(etavals, tvals_np, color='r', label='No Prior Knowledge')
+    if LINEAR:
+        plt.plot(etavals,d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
+        plt.plot(etavals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+    elif LOGY or UNSET:
+        plt.semilogy(etavals,d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
+        plt.semilogy(etavals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+    elif LOGX:
+        plt.semilogx(etavals,d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
+        plt.semilogx(etavals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+    elif LOGLOG:
+        plt.loglog(etavals,d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
+        plt.loglog(etavals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
     plt.axvline(x=minetaval, color='y', linestyle='--',label='$s_c=a$ limit on $\eta_\oplus$')
-    plt.plot(etaearth,T, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    plt.ylabel('Survey duration (seconds)'); plt.xlabel('$\eta_\oplus$')
+    plt.plot(etaearth,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    plt.ylabel('Survey duration (years)'); plt.xlabel('$\eta_\oplus$')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     plt.legend(prop={'size':6}); plt.show()
 
@@ -411,8 +548,18 @@ if SNR0vNOPLUS:
     snrvals_p = SNR_photon_prior(noplusvals, l, avar, rhostar, etaearth, dvar, R, K, eps, T, iwafac, rval)
     snrvals_np = SNR_photon_noprior(noplusvals, l, avar, rhostar, etaearth, dvar, R, K, eps, T, iwafac, rval)
     ax = plt.figure()
-    plt.semilogy(noplusvals, snrvals_p, color='b', label='Prior Knowledge')
-    plt.semilogy(noplusvals, snrvals_np, color='r', label='No Prior Knowledge')
+    if LINEAR:
+        plt.plot(noplusvals, snrvals_p, color='b', label='Prior Knowledge')
+        plt.plot(noplusvals, snrvals_np, color='r', label='No Prior Knowledge')
+    elif LOGY or UNSET:
+        plt.semilogy(noplusvals, snrvals_p, color='b', label='Prior Knowledge')
+        plt.semilogy(noplusvals, snrvals_np, color='r', label='No Prior Knowledge')
+    elif LOGX:
+        plt.semilogx(noplusvals, snrvals_p, color='b', label='Prior Knowledge')
+        plt.semilogx(noplusvals, snrvals_np, color='r', label='No Prior Knowledge')
+    elif LOGLOG:
+        plt.loglog(noplusvals, snrvals_p, color='b', label='Prior Knowledge')
+        plt.loglog(noplusvals, snrvals_np, color='r', label='No Prior Knowledge')
     plt.plot(Noplus,snr0, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('$SNR_0$'); plt.xlabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
