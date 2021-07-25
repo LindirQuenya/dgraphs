@@ -301,7 +301,10 @@ if NOPLUSvD:
         plt.semilogx(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
         plt.semilogx(NoplusVals[1:], dvals_np[1:], color='r', label='No Prior Knowledge')
         plt.semilogx(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
-        plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
+        if HABEX:
+            plt.figtext(0.45, 0.2, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.2, 'Photon-Limited', fontsize=8)
+        else:
+            plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
     elif LOGLOG:
         plt.loglog(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
         plt.loglog(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
