@@ -269,6 +269,48 @@ def SNR_photon_prior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, 
     twothirds = np.power(d(m(4*pi,m(rhostara,etaeartha)),3),2/3)
     return m(d(top, bottom),twothirds)
 
+def get_real_pos_root(coeff0a,coeff2a,coeff10a):
+    roots=np.polynomial.polynomial.Polynomial((coeff0a,0,coeff2a,0,0,0,0,0,0,0,coeff10a)).roots()
+    realroots = roots[np.isreal(roots)]
+    posrealroots = realroots[realroots>0]
+    return npf64(posrealroots[0])
+
+def Noplus_photon_noprior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
+    mvar=m(d(m(m(16,rvala),m(snr0a,snr0a)),m(Ra,m(Ka,epsa))),np.power(d(3,m(4*pi,rhostara)),2/3))
+    nvar=d(m(3,la),avara)
+    alphsq=np.power(d(m(m(5,Ta),m(da,da)),m(3,mvar)),2)
+    beta=np.power(d(nvar,da),2)
+    coeff0=-alphsq
+    coeff2=m(alphsq,beta)
+    coeff10=1
+    #Check if coeff2 is iterable
+    try:
+        len(coeff2)
+        results=np.array([])
+        for i in range(len(coeff2)):
+            #We don't know if alphsq or beta was iterable, so try alphsq.
+            try:
+                len(coeff0)
+                c0=coeff0[i]
+            except TypeError:
+                c0=coeff0
+            #coeff2 should always be iterable, and coeff10 is just 1.
+            c2=coeff2[i]
+            c10=coeff10
+            #Now cube, and multiply by etaearth
+            np.append(results,get_real_pos_root(c0,c2,c10))
+    except TypeError:
+        results=get_real_pos_root(coeff0,coeff2,coeff10)
+    return m(np.power(results,3),etaeartha)
+
+
+def Noplus_photon_prior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
+    cubestop=np.power(m(m(Ra,Ka),m(Ta,epsa)),3)
+    squarestop = np.power(m(m(pi,np.power(da,3)),m(rhostara,etaeartha)),2)
+    bottom=np.power(m(rvala,m(snr0a,snr0a)),3)
+    fraction=m(125/62208,d(m(cubestop,squarestop),bottom))
+    return np.power(fraction,1/5)
+
 #WRONG!
 #def T_iwa_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
 #    top = m(16,m(m(rvala,m(snr0a,snr0a)),m(Noplusa,m(avara,avara))))
@@ -568,7 +610,32 @@ if SNR0vNOPLUS:
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     plt.legend(prop={'size':6}); plt.show()
     
-
+if ETAvNOPLUS:
+    titlestr = ' $\eta_\oplus$ vs $N_\oplus$'
+    etavals = np.linspace(0,1,10000)[1:9999]
+    nvals_np=Noplus_photon_noprior(dvar, l, avar, rhostar, etavals, snr0, R, K, eps, T, iwafac, rval)
+    nvals_p=Noplus_photon_prior(dvar, l, avar, rhostar, etavals, snr0, R, K, eps, T, iwafac, rval)
+    
+    ax = plt.figure()
+    plt.xlim([0,1])
+    if LINEAR or UNSET:
+        plt.plot(etavals,nvals_p, color='b', label='Prior Knowledge')
+        plt.plot(etavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.gca().set_ylim(bottom=0)
+    elif LOGY:
+        plt.semilogy(etavals,nvals_p, color='b', label='Prior Knowledge')
+        plt.semilogy(etavals, nvals_np, color='r', label='No Prior Knowledge')
+    elif LOGX:
+        plt.semilogx(etavals,nvals_p, color='b', label='Prior Knowledge')
+        plt.semilogx(etavals, nvals_np, color='r', label='No Prior Knowledge')
+    elif LOGLOG:
+        plt.loglog(etavals,nvals_p, color='b', label='Prior Knowledge')
+        plt.loglog(etavals, nvals_np, color='r', label='No Prior Knowledge')
+    
+    plt.plot(etaearth,Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    plt.ylabel('Survey Yield'); plt.xlabel('$\eta_\oplus$')
+    plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    plt.legend(prop={'size':6}); plt.show()
 # Sources: HabEx
 # l:              (HabEx Final Report 3-6) (Standards Team Final Report Table 5)
 # eta-earth:      (HabEx Final Report 3-3) (Belikov 2017)
