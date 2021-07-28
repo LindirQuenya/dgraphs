@@ -26,7 +26,7 @@ Generate a graph that compares two variables for a given mission concept.
                           1 -> eta_oplus vs d
                           2 -> d         vs N_oplus
                           3 -> duration  vs d
-                          4 -> eta_oplus vs N_oplus  (Not Implemented)
+                          4 -> eta_oplus vs N_oplus
                           5 -> IWA       vs N_oplus
                           6 -> N_oplus   vs SNR0
                           7 -> N_oplus   vs duration
