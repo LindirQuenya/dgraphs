@@ -256,18 +256,34 @@ def get_etaearth_sca(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
 
 def SNR_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
     Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
-    nvar = d(m(3,la),avara)
-    sq = s(1,np.power(d(m(Dlim,nvar),da),2))
-    extramult=d(m(5,m(m(Ta,Ra),m(Ka,epsa))),m(48,r))
-    fivethirds = np.power(d(etaeartha,Noplusa),5/3)
-    twothirds = np.power(d(m(4*pi,rhostara),3),2/3)
-    return np.sqrt(m(m(sq, extramult),m(fivethirds, twothirds)))
+    innersqrt=np.sqrt(s(1,np.power(d(m(3,m(Dlim,la)),m(da,avara)),2)))
+    top=m(m(m(5/48,Ra),m(Ka,Ta)),m(m(epsa,innersqrt),m(np.power(etaeartha,5/3),np.power(da,2))))
+    bottom=m(rvala,np.power(Noplusa,5/3))
+    outersqrt=np.sqrt(d(top,bottom))
+    cuberoot=np.cbrt(d(m(4*pi,rhostara),3))
+    return m(outersqrt,cuberoot)
 
 def SNR_photon_prior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
-    top=m(m(5,Ta),m(m(Ra,Ka),m(np.power(da,2),epsa)))
-    bottom=m(48,m(r,np.power(Noplusa,5/3)))
-    twothirds = np.power(d(m(4*pi,m(rhostara,etaeartha)),3),2/3)
-    return m(d(top, bottom),twothirds)
+    top=m(m(5/48,np.power(da,2)),m(m(Ra,Ka),m(Ta,epsa)))
+    bottom=m(rvala,np.power(Noplusa,5/3))
+    squareroot=np.sqrt(d(top,bottom))
+    cuberoot=np.cbrt(d(m(4*pi,m(rhostara,etaeartha)),3))
+    return m(squareroot,cuberoot)
+
+#BAD!! SOMETHING IS WRONG WITH THESE!
+#def SNR_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
+#    Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
+#    nvar = d(m(3,la),avara)
+#    sq = s(1,np.power(d(m(Dlim,nvar),da),2))
+#    extramult=d(m(5,m(m(Ta,Ra),m(Ka,epsa))),m(48,r))
+#    fivethirds = np.power(d(etaeartha,Noplusa),5/3)
+#    twothirds = np.power(d(m(4*pi,rhostara),3),2/3)
+#    return np.sqrt(m(m(sq, extramult),m(fivethirds, twothirds)))
+#def SNR_photon_prior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
+#    top=m(m(5,Ta),m(m(Ra,Ka),m(np.power(da,2),epsa)))
+#    bottom=m(48,m(r,np.power(Noplusa,5/3)))
+#    twothirds = np.power(d(m(4*pi,m(rhostara,etaeartha)),3),2/3)
+#    return m(d(top, bottom),twothirds)
 
 def get_real_pos_root(coeff0a,coeff2a,coeff10a):
     roots=np.polynomial.polynomial.Polynomial((coeff0a,0,coeff2a,0,0,0,0,0,0,0,coeff10a)).roots()
@@ -586,7 +602,7 @@ if ETAvT:
 if SNR0vNOPLUS:
     titlestr = ' $SNR_0$ vs $N_\oplus$'
     noplus_limit = get_Noplus_sca([], l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
-    noplusvals = list(range(1,int(noplus_limit)-2))
+    noplusvals = np.linspace(1,int(noplus_limit)-2,1000)
     #Aggressively sample near the asymptote, to give it better clarity.
     nearval = np.linspace(int(noplus_limit)-2, noplus_limit, 1000)[0:999]
     noplusvals = np.concatenate((noplusvals, nearval))
