@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 #from mpmath import mp
+
+# TODO: Replace all eq:label citations with equation numbers.
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
@@ -174,6 +177,7 @@ R=d(m(32*pi*pi, m(r, m(r, m(c, dl)))), m(np.power(l, 4), np.expm1(d(m(h, c), m(l
 
 # Note that 'a' is appended to the end of all the names, to prevent name conflicts
 # with the global vars.
+# Eq Label: "eq:dphotonnoprioriwa"
 def d_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     n = d(m(iwafaca, la), avara)
     cuberoot = np.cbrt(d(m(3, Noplusa), m(4*pi, m(rhostara, etaeartha))))
@@ -183,22 +187,28 @@ def d_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
     outersqrt = np.sqrt(a(1, innersqrt))
     return m(d(n, np.sqrt(2)), m(cuberoot, outersqrt))
 
+# Eq Label: "eq:iwaApprox"
 def iwa_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     return d(m(3,la),d_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala))
 
+# Eq Label: "eq:dphotonnoise"
 def d_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     cuberoot = np.cbrt(d(3, m(4*pi, m(rhostara, etaeartha))))
     onlysqrt = np.sqrt(d(m(m(3, rvala), np.power(Noplusa, 5/3)), m(5, m(Ra, m(Ka, m(Ta, epsa))))))
     return m(m(4, snr0a), m(cuberoot, onlysqrt))
 
+# Eq Label: "eq:dminiwa"
 def d_iwa_all(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     cuberoot = np.cbrt(d(m(3, Noplusa), m(4*pi, m(rhostara, etaeartha))))
     if type(Ta)==np.ndarray:
         return np.array([m(d(m(iwafaca, la), avara), cuberoot) for x in Ta])
     return m(d(m(iwafaca, la), avara), cuberoot)
+
+# Eq Label: "eq:iwaphotonint_noplus"
 def intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     return m(m(5/48, np.power(iwafaca, 2)), d(m(Ra, m(Ka, m(Ta, m(epsa, np.power(la, 2))))), m(rvala, np.power(m(snr0a, avara), 2))))
 
+# No eq label, just a combo of the above.
 def d_prior_noplus(Noplusarr, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     noplus_intersecta = np.array([intersection_prior([], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)])
     #print(Noplusarr.shape)
@@ -209,9 +219,11 @@ def d_prior_noplus(Noplusarr, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
     photonlim2 = d_photon_prior(Noplusarr[:intersect_ind], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
     return np.concatenate((iwalim, photonlim)), np.concatenate((photonlim2, iwalim2))
 
+# Trivial rearrangement of Eq Label : "eq:iwaphotonint_noplus"
 def T_intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     return d(m(Noplusa,m(m(16/5, rvala), np.power(m(snr0a, avara), 2))), m(m(iwafaca, np.power(la, 2)), m(m(Ra, Ka), epsa)))
 
+# No eq label, just a combo of below.
 def d_prior_T(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr, iwafaca, rvala):
     T_intersecta = T_intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, [], iwafaca, rvala)
     #print(Tarr.shape)
@@ -223,6 +235,7 @@ def d_prior_T(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr
     photonlim2 = d_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr[:intersect_ind], iwafaca, rvala)
     return np.concatenate((iwalim, photonlim)), np.concatenate((photonlim2, iwalim2))
 
+# Eq Label: "eq:Tnoprioriwa_sub"
 def T_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
     mvar = d(m(16,m(rvala,m(snr0a,snr0a))),m(Ra,m(Ka,epsa)))
     mvar = m(mvar,np.power(d(3,m(4*pi,rhostara)),2/3))
@@ -232,6 +245,7 @@ def T_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
     #return d(m(mvar,sigvar),m(m(da,da),np.sqrt(np.abs(s(1,np.power(d(m(Dlim,nvar),da),2))))))
     return d(m(mvar,sigvar),m(m(da,da),np.sqrt(s(1,np.power(d(m(Dlim,nvar),da),2)))))
 
+# Eq Label: "eq:Tsumknow_sub"
 def T_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
     front = d(m(m(16,rvala),m(snr0a,snr0a)),m(m(Ra,Ka),m(m(da,da),epsa)))
     middle = np.power(d(3,m(4*pi,m(rhostara,etaeartha))),2/3)
@@ -240,20 +254,24 @@ def T_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa,
 
 T_iwa_prior=T_photon_prior
 
-def get_sc(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
-    Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
-    d(m(3,m(Dlim,la)),da)
+# Not used.
+#def get_sc(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
+#    Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
+#    d(m(3,m(Dlim,la)),da)
 
+# Eq Label: "eq:noplusmaxiwa"
 def get_Noplus_sca(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
-    cubed = np.power(d(m(avara,da),m(3,la)),3)
+    cubed = np.power(d(m(avara,da),m(iwafaca,la)),3)
     modifier = m(4*pi/3,m(rhostara,etaeartha))
     return m(cubed, modifier)
 
+# Eq Label: "eq:etaminiwa"
 def get_etaearth_sca(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
-    cubed = np.power(d(m(3,la),m(avara,da)),3)
+    cubed = np.power(d(m(iwafaca,la),m(avara,da)),3)
     modifier = d(m(3,Noplusa),m(4*pi,rhostara))
     return m(cubed, modifier)
 
+# Eq Label: "eq:SNR0noprior_iwa"
 def SNR_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
     Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
     innersqrt=np.sqrt(s(1,np.power(d(m(3,m(Dlim,la)),m(da,avara)),2)))
@@ -263,6 +281,7 @@ def SNR_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa
     cuberoot=np.cbrt(d(m(4*pi,rhostara),3))
     return m(outersqrt,cuberoot)
 
+# Eq Label: "eq:SNR0prior"
 def SNR_photon_prior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
     top=m(m(5/48,np.power(da,2)),m(m(Ra,Ka),m(Ta,epsa)))
     bottom=m(rvala,np.power(Noplusa,5/3))
@@ -285,12 +304,15 @@ def SNR_photon_prior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, 
 #    twothirds = np.power(d(m(4*pi,m(rhostara,etaeartha)),3),2/3)
 #    return m(d(top, bottom),twothirds)
 
+
+#Just a helper function, which uses np.polynomial to find a real positive root.
 def get_real_pos_root(coeff0a,coeff2a,coeff10a):
     roots=np.polynomial.polynomial.Polynomial((coeff0a,0,coeff2a,0,0,0,0,0,0,0,coeff10a)).roots()
     realroots = roots[np.isreal(roots)]
     posrealroots = realroots[realroots>0]
     return npf64(posrealroots[0])
 
+# Eq Label: "eq:Nstarpolynomial"
 def Noplus_photon_noprior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     mvar=m(d(m(m(16,rvala),m(snr0a,snr0a)),m(Ra,m(Ka,epsa))),np.power(d(3,m(4*pi,rhostara)),2/3))
     nvar=d(m(3,la),avara)
@@ -319,7 +341,7 @@ def Noplus_photon_noprior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
         results=get_real_pos_root(coeff0,coeff2,coeff10)
     return m(np.power(results,3),etaeartha)
 
-
+# Eq Label: "eq:noplusprior"
 def Noplus_photon_prior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     cubestop=np.power(m(m(Ra,Ka),m(Ta,epsa)),3)
     squarestop = np.power(m(m(pi,np.power(da,3)),m(rhostara,etaeartha)),2)
@@ -465,7 +487,7 @@ if DvTIME:
     dvals_p, dvals_pa = d_prior_T(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, timevals, iwafac, rval)
     dvals_np = d_photon_noprior(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, timevals, iwafac, rval)
     ax = plt.figure()
-    if LINEAR or UNSET:
+    if LINEAR:
         plt.plot(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
         plt.plot(timevalsy, dvals_p, color='b', linestyle='--')
         plt.plot(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
@@ -480,7 +502,7 @@ if DvTIME:
         plt.semilogx(timevalsy, dvals_p, color='b', linestyle='--')
         plt.semilogx(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
         plt.semilogx(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    elif LOGLOG:
+    elif LOGLOG or UNSET:
         plt.loglog(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
         plt.loglog(timevalsy, dvals_p, color='b', linestyle='--')
         plt.loglog(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
