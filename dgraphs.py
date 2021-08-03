@@ -115,8 +115,7 @@ if len(sys.argv) > 3:
         print_help()
 else:
     UNSET=True
-#mp.dps=50
-#mp.prec=171
+
 
 npf64 = np.float64
 # Just shortening these, to make expressions more concise.
@@ -211,7 +210,6 @@ def intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, e
 # No eq label, just a combo of the above.
 def d_prior_noplus(Noplusarr, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     noplus_intersecta = np.array([intersection_prior([], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)])
-    #print(Noplusarr.shape)
     intersect_ind = int(np.where(np.isclose(Noplusarr,noplus_intersecta))[0])
     iwalim = d_iwa_all(Noplusarr[:intersect_ind], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
     iwalim2 = d_iwa_all(Noplusarr[intersect_ind:], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
@@ -226,8 +224,6 @@ def T_intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka,
 # No eq label, just a combo of below.
 def d_prior_T(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr, iwafaca, rvala):
     T_intersecta = T_intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, [], iwafaca, rvala)
-    #print(Tarr.shape)
-    #print(T_intersecta.shape)
     intersect_ind =  int(np.where(np.isclose(Tarr,T_intersecta))[0])
     iwalim = d_iwa_all(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr[:intersect_ind], iwafaca, rvala)
     iwalim2 = d_iwa_all(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr[intersect_ind:], iwafaca, rvala)
@@ -253,11 +249,6 @@ def T_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa,
     return m(front,m(middle,end))
 
 T_iwa_prior=T_photon_prior
-
-# Not used.
-#def get_sc(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
-#    Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
-#    d(m(3,m(Dlim,la)),da)
 
 # Eq Label: "eq:noplusmaxiwa"
 def get_Noplus_sca(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
@@ -288,22 +279,6 @@ def SNR_photon_prior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, 
     squareroot=np.sqrt(d(top,bottom))
     cuberoot=np.cbrt(d(m(4*pi,m(rhostara,etaeartha)),3))
     return m(squareroot,cuberoot)
-
-#BAD!! SOMETHING IS WRONG WITH THESE!
-#def SNR_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
-#    Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
-#    nvar = d(m(3,la),avara)
-#    sq = s(1,np.power(d(m(Dlim,nvar),da),2))
-#    extramult=d(m(5,m(m(Ta,Ra),m(Ka,epsa))),m(48,r))
-#    fivethirds = np.power(d(etaeartha,Noplusa),5/3)
-#    twothirds = np.power(d(m(4*pi,rhostara),3),2/3)
-#    return np.sqrt(m(m(sq, extramult),m(fivethirds, twothirds)))
-#def SNR_photon_prior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
-#    top=m(m(5,Ta),m(m(Ra,Ka),m(np.power(da,2),epsa)))
-#    bottom=m(48,m(r,np.power(Noplusa,5/3)))
-#    twothirds = np.power(d(m(4*pi,m(rhostara,etaeartha)),3),2/3)
-#    return m(d(top, bottom),twothirds)
-
 
 #Just a helper function, which uses np.polynomial to find a real positive root.
 def get_real_pos_root(coeff0a,coeff2a,coeff10a):
@@ -349,11 +324,8 @@ def Noplus_photon_prior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa,
     fraction=m(125/62208,d(m(cubestop,squarestop),bottom))
     return np.power(fraction,1/5)
 
-#WRONG!
-#def T_iwa_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
-#    top = m(16,m(m(rvala,m(snr0a,snr0a)),m(Noplusa,m(avara,avara))))
-#    bottom = m(15,m(m(Ra,Ka),m(epsa,m(la,la))))
-#    return d(top,bottom)
+
+# Now we get to actually graph all these things.
 
 if NOPLUSvD:
     noplus_intersect = intersection_prior([], l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
@@ -363,7 +335,7 @@ if NOPLUSvD:
     dvals_p, dvals_pa  = d_prior_noplus(NoplusVals, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
     dvals_np = d_photon_noprior(NoplusVals, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
 
-    ax=plt.figure()  # ; pltfname=HABEX*'HabEx' + LUVOIR*'LUVOIR'+'plt.pickle'
+    ax=plt.figure()
     if LINEAR:
         plt.plot(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
         plt.plot(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
@@ -399,7 +371,7 @@ if NOPLUSvD:
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + 
                       ' Minimum Diameter vs. Yield, for $\eta_\oplus='+str(float(etaearth))+'$.'))
     plt.legend(prop={'size':6}); plt.ylim([-10, 200])
-    plt.show() # pickle.dump(ax, open(pltfname,'wb'))
+    plt.show()
 
 if ETAvD:
     # Skip 1st element of both lists to prevent div0 and doubling of eta-earth.
@@ -481,7 +453,6 @@ if DvTIME:
     timevals = np.array(timevals)
     timevals = np.concatenate([timevals, tval2])
     timevals = np.sort(timevals)
-    #print(timevals.shape)
     timevalsy = d(timevals, 3600*24*365)
     titlestr = ' Telescope Diameter vs. Survey Duration, for $\eta_\oplus='+str(float(etaearth))+'$.'
     dvals_p, dvals_pa = d_prior_T(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, timevals, iwafac, rval)
@@ -557,19 +528,6 @@ if NOPLUSvT:
     noplusvals = np.concatenate((noplusvals, nearval))
     tvals_p = T_photon_prior(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
     tvals_np = T_photon_noprior(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
-    #noplusvals = list(range(1,1001))
-    #noplus_intersect = intersection_prior([], l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
-    #NoplusVals = np.concatenate((np.array(range(int(noplus_intersect+1))),
-    #                             np.array([noplus_intersect]),
-    #                             np.array(range(int(noplus_intersect+1), int(8*noplus_intersect)))))
-    #tvals_p_pho = T_photon_prior(np.array(range(int(noplus_intersect+1))), l, avar, rhostar,
-    #                             etaearth, snr0, R, K, eps, dvar, iwafac, rval)
-    #tvals_p_iwa = T_iwa_prior(np.array(range(int(noplus_intersect+1), int(8*noplus_intersect))),
-    #                          l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
-    #tvals_np = T_photon_noprior(NoplusVals, l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
-    #noplusvals = np.concatenate((np.array(range(int(noplus_intersect+1))),
-    #                             np.array(range(int(noplus_intersect+1), int(8*noplus_intersect)))))
-    #tvals_p = np.concatenate((tvals_p_pho,tvals_p_iwa))
     ax = plt.figure()
     if LINEAR:
         plt.plot(noplusvals, d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
