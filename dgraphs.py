@@ -127,6 +127,8 @@ npf64 = np.float64
 # Just shortening these, to make expressions more concise.
 m = np.multiply; d = np.divide; a = np.add; s = np.subtract; e=np.e; pi=np.pi
 
+slewtimeoverhead=0.55
+
 h=npf64("6.62607015e-27")      # Planck's constant,            in erg-seconds
 c=npf64('299792458')           # Speed of light,               in meters/second
 k=npf64("1.380649e-16")        # Boltzmann constant,           in erg-kelvins
@@ -336,13 +338,13 @@ def Noplus_photon_prior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa,
 
 def Noplus_iwa_prior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     cubes = np.power(d(m(avara,da),la),3)
-    linear = m(4*pi/81, m(rhostara, etaeartha))
+    linear = m(4*pi, d(m(rhostara, etaeartha),np.power(iwafaca,3)))
     res = m(linear, cubes)
     try:
         len(res)
         return res
     except:
-        return [res for i in m(m(m(snr0a, Ra), m(Ka, epsa)),m(Ta,m(iwafaca,rvala)))]
+        return [res for i in m(m(m(snr0a, Ra), m(Ka, epsa)),m(Ta,rvala))]
 
 # Now we get to actually graph all these things.
 
