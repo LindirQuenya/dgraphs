@@ -25,15 +25,17 @@ Generate a graph that compares two variables for a given mission concept.
 
   STUDY          one of [habex, luvoir, luvoiralt]
   COMPARISON     integer, [0..3] such that: (x vs y)
-                          0 -> N_oplus   vs d
-                          1 -> eta_oplus vs d
-                          2 -> d         vs N_oplus
-                          3 -> duration  vs d
-                          4 -> eta_oplus vs N_oplus
-                          5 -> IWA       vs N_oplus
-                          6 -> N_oplus   vs SNR0
-                          7 -> N_oplus   vs duration
-                          8 -> eta_oplus vs duration
+                          0  -> N_oplus    vs d
+                          1  -> eta_oplus  vs d
+                          2  -> d          vs N_oplus
+                          3  -> duration   vs d
+                          4  -> eta_oplus  vs N_oplus
+                          5  -> IWA        vs N_oplus
+                          6  -> N_oplus    vs SNR0
+                          7  -> N_oplus    vs duration
+                          8  -> eta_oplus  vs duration
+                          9  -> efficiency vs N_oplus
+                          10 -> iwafactor  vs N_oplus
   GRAPHTYPE      one of [linear, logy, logx, loglog]
 
 If an invalid value is supplied for STUDY, it will
@@ -73,7 +75,7 @@ if len(sys.argv) > 1:
         exit(1)
 
 
-NOPLUSvD, ETAvD, DvNOPLUS, DvTIME, ETAvNOPLUS, IWAvNOPLUS, SNR0vNOPLUS, NOPLUSvT, ETAvT = [False]*9
+NOPLUSvD, ETAvD, DvNOPLUS, DvTIME, ETAvNOPLUS, IWAvNOPLUS, SNR0vNOPLUS, NOPLUSvT, ETAvT, IWAFACvNOPLUS, EPSvNOPLUS = [False]*11
 if len(sys.argv) > 2:
     if '0' == sys.argv[2]:
         NOPLUSvD=True
@@ -93,6 +95,10 @@ if len(sys.argv) > 2:
         NOPLUSvT = True
     elif '8' == sys.argv[2]:
         ETAvT = True
+    elif '9' == sys.argv[2]:
+        EPSvNOPLUS=True
+    elif '10' == sys.argv[2]:
+        IWAFACvNOPLUS=True
     else:
         print_help()
         #exit(1)
@@ -181,14 +187,14 @@ def d_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
     n = d(m(iwafaca, la), avara)
     cuberoot = np.cbrt(d(m(3, Noplusa), m(4*pi, m(rhostara, etaeartha))))
     is_low = m(5, m(Ra, m(Ka, m(epsa, m(np.power(n, 2), m(Ta, etaeartha))))))
-    is_high = m(48, m(m(rvala,np.power(snr0a, 2)), Noplusa))
+    is_high = m(96, m(m(rvala,np.power(snr0a, 2)), Noplusa))
     innersqrt = np.sqrt(a(1, np.power(d(is_high, is_low), 2)))
     outersqrt = np.sqrt(a(1, innersqrt))
     return m(d(n, np.sqrt(2)), m(cuberoot, outersqrt))
 
 # Eq Label: "eq:iwaApprox"
 def iwa_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
-    return d(m(3,la),d_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala))
+    return d(m(iwafaca,la),d_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala))
 
 # Eq Label: "eq:dphotonnoise"
 def d_photon_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
@@ -217,9 +223,9 @@ def d_prior_noplus(Noplusarr, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
     photonlim2 = d_photon_prior(Noplusarr[:intersect_ind], la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala)
     return np.concatenate((iwalim, photonlim)), np.concatenate((photonlim2, iwalim2))
 
-# Trivial rearrangement of Eq Label : "eq:iwaphotonint_noplus"
+# Trivial rearrangement of Eq Label : "eq:iwaphotonint_noplus" TODO: check if this needs an extra iwafac
 def T_intersection_prior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
-    return d(m(Noplusa,m(m(16/5, rvala), np.power(m(snr0a, avara), 2))), m(m(iwafaca, np.power(la, 2)), m(m(Ra, Ka), epsa)))
+    return d(m(Noplusa,m(m(48/5, rvala), np.power(m(snr0a, avara), 2))), m(np.power(m(iwafaca, la), 2), m(m(Ra, Ka), epsa)))
 
 # No eq label, just a combo of below.
 def d_prior_T(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr, iwafaca, rvala):
@@ -235,7 +241,7 @@ def d_prior_T(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Tarr
 def T_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, da, iwafaca, rvala):
     mvar = d(m(16,m(rvala,m(snr0a,snr0a))),m(Ra,m(Ka,epsa)))
     mvar = m(mvar,np.power(d(3,m(4*pi,rhostara)),2/3))
-    nvar = d(m(3,la),avara)
+    nvar = d(m(iwafaca,la),avara)
     sigvar = m(3/5,np.power(d(Noplusa,etaeartha),5/3))
     Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
     #return d(m(mvar,sigvar),m(m(da,da),np.sqrt(np.abs(s(1,np.power(d(m(Dlim,nvar),da),2))))))
@@ -265,7 +271,7 @@ def get_etaearth_sca(Noplusa, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
 # Eq Label: "eq:SNR0noprior_iwa"
 def SNR_photon_noprior(Noplusa, la, avara, rhostara, etaeartha, da, Ra, Ka, epsa, Ta, iwafaca, rvala):
     Dlim = np.cbrt(d(m(3,Noplusa),m(4*pi,m(rhostara, etaeartha))))
-    innersqrt=np.sqrt(s(1,np.power(d(m(3,m(Dlim,la)),m(da,avara)),2)))
+    innersqrt=np.sqrt(s(1,np.power(d(m(iwafaca,m(Dlim,la)),m(da,avara)),2)))
     top=m(m(m(5/48,Ra),m(Ka,Ta)),m(m(epsa,innersqrt),m(np.power(etaeartha,5/3),np.power(da,2))))
     bottom=m(rvala,np.power(Noplusa,5/3))
     outersqrt=np.sqrt(d(top,bottom))
@@ -290,9 +296,9 @@ def get_real_pos_root(coeff0a,coeff2a,coeff10a):
 # Eq Label: "eq:Nstarpolynomial"
 def Noplus_photon_noprior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
     mvar=m(d(m(m(16,rvala),m(snr0a,snr0a)),m(Ra,m(Ka,epsa))),np.power(d(3,m(4*pi,rhostara)),2/3))
-    nvar=d(m(3,la),avara)
+    nvar=d(m(iwafaca,la),avara)
     alphsq=np.power(d(m(m(5,Ta),m(da,da)),m(3,mvar)),2)
-    beta=np.power(d(nvar,da),2)
+    beta=m(np.power(d(nvar,da),2),np.power(d(3,m(4*pi,rhostara)),2/3))
     coeff0=-alphsq
     coeff2=m(alphsq,beta)
     coeff10=1
@@ -311,7 +317,7 @@ def Noplus_photon_noprior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, eps
             c2=coeff2[i]
             c10=coeff10
             #Now cube, and multiply by etaearth
-            np.append(results,get_real_pos_root(c0,c2,c10))
+            results=np.append(results,get_real_pos_root(c0,c2,c10))
     except TypeError:
         results=get_real_pos_root(coeff0,coeff2,coeff10)
     return m(np.power(results,3),etaeartha)
@@ -322,8 +328,21 @@ def Noplus_photon_prior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa,
     squarestop = np.power(m(m(pi,np.power(da,3)),m(rhostara,etaeartha)),2)
     bottom=np.power(m(rvala,m(snr0a,snr0a)),3)
     fraction=m(125/62208,d(m(cubestop,squarestop),bottom))
-    return np.power(fraction,1/5)
+    try:
+        len(fraction)
+        return np.power(fraction,1/5)
+    except:
+        return [np.power(fraction,1/5) for i in m(m(la,avara),iwafaca)]
 
+def Noplus_iwa_prior(da, la, avara, rhostara, etaeartha, snr0a, Ra, Ka, epsa, Ta, iwafaca, rvala):
+    cubes = np.power(d(m(avara,da),la),3)
+    linear = m(4*pi/81, m(rhostara, etaeartha))
+    res = m(linear, cubes)
+    try:
+        len(res)
+        return res
+    except:
+        return [res for i in m(m(m(snr0a, Ra), m(Ka, epsa)),m(Ta,m(iwafaca,rvala)))]
 
 # Now we get to actually graph all these things.
 
@@ -447,11 +466,12 @@ if DvTIME:
     tintersect = T_intersection_prior(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, [], iwafac, rval)
     timevals = list(np.linspace(0.1*tintersect, 10*T, 10000))
     tval2 = np.linspace(1, 2*tintersect, 1000)
+    tval3 = np.linspace(1, 100000,100000)
     timevals.append(T)
     timevals.append(tintersect)
     timevals.sort()
     timevals = np.array(timevals)
-    timevals = np.concatenate([timevals, tval2])
+    timevals = np.concatenate([timevals, tval2, tval3])
     timevals = np.sort(timevals)
     timevalsy = d(timevals, 3600*24*365)
     titlestr = ' Telescope Diameter vs. Survey Duration, for $\eta_\oplus='+str(float(etaearth))+'$.'
@@ -610,8 +630,9 @@ if ETAvNOPLUS:
     titlestr = ' $\eta_\oplus$ vs $N_\oplus$'
     etavals = np.linspace(0,1,10000)[1:9999]
     nvals_np=Noplus_photon_noprior(dvar, l, avar, rhostar, etavals, snr0, R, K, eps, T, iwafac, rval)
-    nvals_p=Noplus_photon_prior(dvar, l, avar, rhostar, etavals, snr0, R, K, eps, T, iwafac, rval)
-    
+    nvals_pp=Noplus_photon_prior(dvar, l, avar, rhostar, etavals, snr0, R, K, eps, T, iwafac, rval)
+    nvals_ip=Noplus_iwa_prior(dvar, l, avar, rhostar, etavals, snr0, R, K, eps, T, iwafac, rval)
+    nvals_p = [min(nvals_pp[i], nvals_ip[i]) for i in range(len(nvals_ip))]
     ax = plt.figure()
     plt.xlim([0,1])
     if LINEAR or UNSET:
@@ -630,6 +651,59 @@ if ETAvNOPLUS:
     
     plt.plot(etaearth,Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Survey Yield'); plt.xlabel('$\eta_\oplus$')
+    plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    plt.legend(prop={'size':6}); plt.show()
+if EPSvNOPLUS:
+    titlestr=' Survey Efficiency vs $N_\oplus$'
+    epsvals=np.linspace(0,1,10000)[1:9999]
+    nvals_np=Noplus_photon_noprior(dvar, l, avar, rhostar, etaearth, snr0, R, K, epsvals, T, iwafac, rval)
+    nvals_pp=Noplus_photon_prior(dvar, l, avar, rhostar, etaearth, snr0, R, K, epsvals, T, iwafac, rval)
+    nvals_ip=Noplus_iwa_prior(dvar, l, avar, rhostar, etaearth, snr0, R, K, epsvals, T, iwafac, rval)
+    nvals_p = [min(nvals_pp[i], nvals_ip[i]) for i in range(len(nvals_ip))]
+    if LINEAR or UNSET:
+        plt.plot(epsvals,nvals_p, color='b', label='Prior Knowledge')
+        plt.plot(epsvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.gca().set_ylim(bottom=0)
+        plt.xlim([0,1])
+    elif LOGY:
+        plt.semilogy(epsvals,nvals_p, color='b', label='Prior Knowledge')
+        plt.semilogy(epsvals, nvals_np, color='r', label='No Prior Knowledge')
+    elif LOGX:
+        plt.semilogx(epsvals,nvals_p, color='b', label='Prior Knowledge')
+        plt.semilogx(epsvals, nvals_np, color='r', label='No Prior Knowledge')
+    elif LOGLOG:
+        plt.loglog(epsvals,nvals_p, color='b', label='Prior Knowledge')
+        plt.loglog(epsvals, nvals_np, color='r', label='No Prior Knowledge')
+    
+    plt.plot(eps, Noplus, 'go', label='Assumption', markersize=3)
+    plt.ylabel('Survey Yield'); plt.xlabel('Survey Efficiency')
+    plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    plt.legend(prop={'size':6}); plt.show()
+
+if IWAFACvNOPLUS:
+    titlestr = ' IWA ($\lambda$/d) vs $N_\oplus$'
+    iwavals = np.linspace(1,6,10000)
+    nvals_np=Noplus_photon_noprior(dvar, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwavals, rval)
+    nvals_pp=Noplus_photon_prior(dvar, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwavals, rval)
+    nvals_ip=Noplus_iwa_prior(dvar, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwavals, rval)
+    nvals_p = [min(nvals_pp[i], nvals_ip[i]) for i in range(len(nvals_ip))]
+    ax = plt.figure()
+    if LINEAR or UNSET:
+        plt.plot(iwavals,nvals_p, color='b', label='Prior Knowledge')
+        plt.plot(iwavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.gca().set_ylim(bottom=0)
+    elif LOGY:
+        plt.semilogy(iwavals,nvals_p, color='b', label='Prior Knowledge')
+        plt.semilogy(iwavals, nvals_np, color='r', label='No Prior Knowledge')
+    elif LOGX:
+        plt.semilogx(iwavals,nvals_p, color='b', label='Prior Knowledge')
+        plt.semilogx(iwavals, nvals_np, color='r', label='No Prior Knowledge')
+    elif LOGLOG:
+        plt.loglog(iwavals,nvals_p, color='b', label='Prior Knowledge')
+        plt.loglog(iwavals, nvals_np, color='r', label='No Prior Knowledge')
+    
+    plt.plot(iwafac, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    plt.ylabel('Survey Yield'); plt.xlabel('IWA ($\lambda$/d)')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     plt.legend(prop={'size':6}); plt.show()
 # Sources: HabEx
