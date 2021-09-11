@@ -36,8 +36,9 @@ Generate a graph that compares two variables for a given mission concept.
                           7  -> eta_oplus  vs duration
                           8  -> efficiency vs N_oplus
                           9  -> iwafactor  vs N_oplus
+                          10 -> contrast   vs N_oplus
   GRAPHTYPE      one of [linear, logy, logx, loglog]
-  AUTOSAVE       either "save" or anything else
+  AUTOSAVE       "save", "savepgf" or anything else
 
 If an invalid value is supplied for STUDY, it will
 default to habex.
@@ -50,9 +51,10 @@ is supplied for GRAPHTYPE, the default will depend
 on COMPARISON.
 
 If AUTOSAVE is "save", graphs will not be displayed,
-but rather saved automatically to the preconfigured
+but rather saved automatically as PNGs to the preconfigured
 filenames. This is quite useful for quickly regenerating
-a whole set of graphs, with little user interaction.
+a whole set of graphs, with little user interaction.If
+AUTOSAVE is "savepgf", the graphs will be saved as PGFs instead. 
 Note that GRAPHTYPE must be supplied if AUTOSAVE is used.
 """)
 
@@ -82,7 +84,8 @@ if len(sys.argv) > 1:
         exit(1)
 
 
-NOPLUSvD, ETAvD, DvNOPLUS, DvTIME, ETAvNOPLUS, IWAvNOPLUS, SNR0vNOPLUS, NOPLUSvT, ETAvT, IWAFACvNOPLUS, EPSvNOPLUS = [False]*11
+NOPLUSvD, ETAvD, DvNOPLUS, DvTIME, ETAvNOPLUS, IWAvNOPLUS, SNR0vNOPLUS,\
+          NOPLUSvT, ETAvT, IWAFACvNOPLUS, EPSvNOPLUS, CONTRASTvNOPLUS = [False]*12
 if len(sys.argv) > 2:
     if '0' == sys.argv[2]:
         NOPLUSvD=True
@@ -106,6 +109,8 @@ if len(sys.argv) > 2:
         EPSvNOPLUS=True
     elif '9' == sys.argv[2]:
         IWAFACvNOPLUS=True
+    elif '10' ==sys.argv[2]:
+        CONTRASTvNOPLUS=True
     else:
         print_help()
         #exit(1)
@@ -130,9 +135,13 @@ else:
     UNSET=True
 
 SAVE=False
+base_file_ext='.png'
 if len(sys.argv) > 4:
     if 'save' == sys.argv[4]:
         SAVE=True
+    elif 'savepgf' == sys.argv[4]:
+        SAVE=True
+        base_file_ext='.pgf'
 
 def showplt(plt, fname):
     if SAVE:
@@ -166,7 +175,7 @@ rval=1+npf64('8.75')           # Background counts +/-2.29,    in unitless
 if HABEX:
     savepath/='HabEx'
     filename='HabEx_'
-    fileext ='.png'
+    fileext = base_file_ext
     res=npf64('140')           # Spectral resolution,          in unitless
     dl=d(l,res)                # Wavelength band width,        in meters
     T=npf64('63113851.9')      # Survey duration=2 years,      in seconds
@@ -182,7 +191,7 @@ if LUVOIR:
     #Again: confusing, got renamed, deal with it.
     savepath/='LuvoirAlt'
     filename='LUVOIR_'
-    fileext ='.uncorr.png'
+    fileext ='.uncorr' + base_file_ext
     res=npf64('140')           # Spectral resolution,          in unitless
     dl=d(l,res)                # Wavelength band width,        in meters
     T=npf64('63113851.9')      # Survey duration=2 years,      in seconds
@@ -196,7 +205,7 @@ if LUVOIR:
 if LUVOIRALT:
     savepath/='Luvoir'
     filename='LUVOIR_'
-    fileext ='.png'
+    fileext = base_file_ext
     res=npf64('140')           # Spectral resolution,          in unitless
     dl=d(l,res)                # Wavelength band width,        in meters
     T=npf64('63113851.9')      # Survey duration=2 years,      in seconds
@@ -831,6 +840,40 @@ if IWAFACvNOPLUS:
     savepath/=filename
     showplt(plt,savepath)
 
+if CONTRASTvNOPLUS:
+    filename+='noplus_kvar'
+    titlestr = ' Contrast K vs $N_\oplus$'
+    kvals = np.logspace(-11.5,-8.5,10000)
+    noplus_limit = get_Noplus_sca([], l, avar, rhostar, etaearth, snr0, R, kvals, eps, dvar, iwafac, rval)
+    nvals_np=Noplus_photon_noprior(dvar, l, avar, rhostar, etaearth, snr0, R, kvals, eps, T, iwafac, rval)
+    nvals_pp=Noplus_photon_prior(dvar, l, avar, rhostar, etaearth, snr0, R, kvals, eps, T, iwafac, rval)
+    nvals_ip=Noplus_iwa_prior(dvar, l, avar, rhostar, etaearth, snr0, R, kvals, eps, T, iwafac, rval)
+    nvals_p = [min(nvals_pp[i], nvals_ip[i], noplus_limit) for i in range(len(nvals_ip))]
+    ax = plt.figure()
+    if LINEAR or UNSET:
+        plt.plot(kvals,nvals_p, color='b', label='Prior Knowledge')
+        plt.plot(kvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.gca().set_ylim(bottom=0)
+    elif LOGY:
+        filename+='.logy'
+        plt.semilogy(kvals,nvals_p, color='b', label='Prior Knowledge')
+        plt.semilogy(kvals, nvals_np, color='r', label='No Prior Knowledge')
+    elif LOGX:
+        filename+='.logx'
+        plt.semilogx(kvals,nvals_p, color='b', label='Prior Knowledge')
+        plt.semilogx(kvals, nvals_np, color='r', label='No Prior Knowledge')
+    elif LOGLOG:
+        filename+='.loglog'
+        plt.loglog(kvals,nvals_p, color='b', label='Prior Knowledge')
+        plt.loglog(kvals, nvals_np, color='r', label='No Prior Knowledge')
+    
+    plt.plot(K, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
+    plt.ylabel('Survey Yield'); plt.xlabel('Flux Contrast Ratio')
+    plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    plt.legend(prop={'size':6})
+    filename+=fileext
+    savepath/=filename
+    showplt(plt,savepath)
 # Sources: HabEx
 # l:              (HabEx Final Report 3-6) (Standards Team Final Report Table 5)
 # eta-earth:      (HabEx Final Report 3-3) (Belikov 2017)
