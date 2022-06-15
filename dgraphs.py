@@ -154,7 +154,7 @@ npf64 = np.float64
 # Just shortening these, to make expressions more concise.
 m = np.multiply; d = np.divide; a = np.add; s = np.subtract; e=np.e; pi=np.pi
 
-savepath=Path.home()/'Pictures/dgraphs'
+savepath=Path.home()/'Documents/GitHub/dgraphs'
 
 slewtimeoverhead=0.55
 slewfac = npf64(1 - slewtimeoverhead)
@@ -183,7 +183,7 @@ if HABEX:
     eps=npf64('0.5')           # Observatory efficiency,       in unitless
     dvar=npf64('4.0')          # HabEx primary diameter,       in meters
     iwafac=npf64('3')          # iwa=3 l/d, iwafac=3,          in unitless
-    Noplus=npf64('20')         # Target Exo-Earth yield,       in unitless No-prior
+    Noplus=npf64('20')         # Target Exo-Earth yield,       in unitless No-precursor
     snr0=npf64('7')            # Target signal-to-noise ratio, in unitless
 
 # For LUVOIR mission concept: Sig. Sci. Case #1.
@@ -401,23 +401,23 @@ if NOPLUSvD:
 
     ax=plt.figure()
     if LINEAR:
-        plt.plot(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
+        plt.plot(NoplusVals[1:], dvals_p[1:], color='b', label='Precursor Knowledge')
         plt.plot(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
-        plt.plot(NoplusVals[1:], dvals_np[1:], color='r', label='No Prior Knowledge')
+        plt.plot(NoplusVals[1:], dvals_np[1:], color='r', label='No Precursor Knowledge')
         plt.plot(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
         plt.figtext(0.135, 0.56, 'IWA-Limited', fontsize=8);plt.figtext(0.54, 0.56, 'Photon-Limited', fontsize=8)
     elif LOGY:
         filename+='.logy'
-        plt.semilogy(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
+        plt.semilogy(NoplusVals[1:], dvals_p[1:], color='b', label='Precursor Knowledge')
         plt.semilogy(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
-        plt.semilogy(NoplusVals[1:], dvals_np[1:], color='r', label='No Prior Knowledge')
+        plt.semilogy(NoplusVals[1:], dvals_np[1:], color='r', label='No Precursor Knowledge')
         plt.semilogy(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
         plt.figtext(0.135, 0.8, 'IWA-Limited', fontsize=8);plt.figtext(0.54, 0.65, 'Photon-Limited', fontsize=8)
     elif LOGX or UNSET:
         filename+='.logx'
-        plt.semilogx(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
+        plt.semilogx(NoplusVals[1:], dvals_p[1:], color='b', label='Precursor Knowledge')
         plt.semilogx(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
-        plt.semilogx(NoplusVals[1:], dvals_np[1:], color='r', label='No Prior Knowledge')
+        plt.semilogx(NoplusVals[1:], dvals_np[1:], color='r', label='No Precursor Knowledge')
         plt.semilogx(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
         if HABEX:
             plt.figtext(0.45, 0.2, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.2, 'Photon-Limited', fontsize=8)
@@ -425,9 +425,9 @@ if NOPLUSvD:
             plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
     elif LOGLOG:
         filename+='.loglog'
-        plt.loglog(NoplusVals[1:], dvals_p[1:], color='b', label='Prior Knowledge')
+        plt.loglog(NoplusVals[1:], dvals_p[1:], color='b', label='Precursor Knowledge')
         plt.loglog(NoplusVals[1:], dvals_pa[1:], color='b', linestyle='--')
-        plt.loglog(NoplusVals[1:], dvals_np[1:], color='r', label='No Prior Knowledge')
+        plt.loglog(NoplusVals[1:], dvals_np[1:], color='r', label='No Precursor Knowledge')
         plt.loglog(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
         plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
     # plt.axvline(x=Noplus, color='g', linestyle='--', label=HABEX*'HabEx' + LUVOIR*'LUVOIR'+' Expected Yield')
@@ -460,23 +460,23 @@ if ETAvD:
     dvals_np = d_photon_noprior(Noplus, l, avar, rhostar, etavals, snr0, R, K, eps, T, iwafac, rval)
     ax = plt.figure()
     if LINEAR:
-        plt.plot(etavals, dvals_p, color='b', label='Prior Knowledge')
-        plt.plot(etavals, dvals_np, color='r', label='No Prior Knowledge')
+        plt.plot(etavals, dvals_p, color='b', label='Precursor Knowledge')
+        plt.plot(etavals, dvals_np, color='r', label='No Precursor Knowledge')
         plt.plot(etaearth, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGY:
         filename+='.logy'
-        plt.semilogy(etavals, dvals_p, color='b', label='Prior Knowledge')
-        plt.semilogy(etavals, dvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogy(etavals, dvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogy(etavals, dvals_np, color='r', label='No Precursor Knowledge')
         plt.semilogy(etaearth, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(etavals, dvals_p, color='b', label='Prior Knowledge')
-        plt.semilogx(etavals, dvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogx(etavals, dvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogx(etavals, dvals_np, color='r', label='No Precursor Knowledge')
         plt.semilogx(etaearth, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGLOG or UNSET:
         filename+='.loglog'
-        plt.loglog(etavals, dvals_p, color='b', label='Prior Knowledge')
-        plt.loglog(etavals, dvals_np, color='r', label='No Prior Knowledge')
+        plt.loglog(etavals, dvals_p, color='b', label='Precursor Knowledge')
+        plt.loglog(etavals, dvals_np, color='r', label='No Precursor Knowledge')
         plt.loglog(etaearth, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Minimum Telescope Diameter (m)'); plt.xlabel('$\eta_\oplus$')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
@@ -498,27 +498,27 @@ if DvNOPLUS:
     dvals_np = d_photon_noprior(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwafac, rval)
     ax = plt.figure()
     if LINEAR or UNSET:
-        plt.plot(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.plot(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
         plt.plot(dvals_pa, noplusvals, color='b', linestyle='--')
-        plt.plot(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.plot(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
         plt.plot(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGY:
         filename+='.logy'
-        plt.semilogy(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.semilogy(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
         plt.semilogy(dvals_pa, noplusvals, color='b', linestyle='--')
-        plt.semilogy(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.semilogy(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
         plt.semilogy(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.semilogx(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
         plt.semilogx(dvals_pa, noplusvals, color='b', linestyle='--')
-        plt.semilogx(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.semilogx(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
         plt.semilogx(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGLOG:
         filename+='.loglog'
-        plt.loglog(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+        plt.loglog(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
         plt.loglog(dvals_pa, noplusvals, color='b', linestyle='--')
-        plt.loglog(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+        plt.loglog(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
         plt.loglog(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
 
     plt.xlabel('Telescope Diameter (m)'); plt.ylabel('Exo-Earth Yield')
@@ -547,27 +547,27 @@ if DvTIME:
     dvals_np = d_photon_noprior(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, timevals, iwafac, rval)
     ax = plt.figure()
     if LINEAR:
-        plt.plot(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
+        plt.plot(timevalsy, dvals_pa, color='b', label='Precursor Knowledge')
         plt.plot(timevalsy, dvals_p, color='b', linestyle='--')
-        plt.plot(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
+        plt.plot(timevalsy, dvals_np, color='r', label='No Precursor Knowledge')
         plt.plot(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGY:
         filename+='.logy'
-        plt.semilogy(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
+        plt.semilogy(timevalsy, dvals_pa, color='b', label='Precursor Knowledge')
         plt.semilogy(timevalsy, dvals_p, color='b', linestyle='--')
-        plt.semilogy(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogy(timevalsy, dvals_np, color='r', label='No Precursor Knowledge')
         plt.semilogy(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
+        plt.semilogx(timevalsy, dvals_pa, color='b', label='Precursor Knowledge')
         plt.semilogx(timevalsy, dvals_p, color='b', linestyle='--')
-        plt.semilogx(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogx(timevalsy, dvals_np, color='r', label='No Precursor Knowledge')
         plt.semilogx(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGLOG or UNSET:
         filename+='.loglog'
-        plt.loglog(timevalsy, dvals_pa, color='b', label='Prior Knowledge')
+        plt.loglog(timevalsy, dvals_pa, color='b', label='Precursor Knowledge')
         plt.loglog(timevalsy, dvals_p, color='b', linestyle='--')
-        plt.loglog(timevalsy, dvals_np, color='r', label='No Prior Knowledge')
+        plt.loglog(timevalsy, dvals_np, color='r', label='No Precursor Knowledge')
         plt.loglog(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Telescope Diameter (m)'); plt.xlabel('Survey Duration (years)')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
@@ -591,27 +591,27 @@ if DvTIME:
 ##    ax = plt.figure()
 ##    dvals_p = d(m(3,l),dvals_p);dvals_pa = d(m(3,l),dvals_pa);dvals_np = d(m(3,l),dvals_np);dvar = d(m(3,l),dvar);
 ##    if LINEAR or UNSET:
-##        plt.plot(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+##        plt.plot(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
 ##        plt.plot(dvals_pa, noplusvals, color='b', linestyle='--')
-##        plt.plot(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+##        plt.plot(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
 ##        plt.plot(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
 ##    elif LOGY:
 ##        filename+='.logy'
-##        plt.semilogy(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+##        plt.semilogy(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
 ##        plt.semilogy(dvals_pa, noplusvals, color='b', linestyle='--')
-##        plt.semilogy(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+##        plt.semilogy(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
 ##        plt.semilogy(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
 ##    elif LOGX:
 ##        filename+='.logx'
-##        plt.semilogx(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+##        plt.semilogx(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
 ##        plt.semilogx(dvals_pa, noplusvals, color='b', linestyle='--')
-##        plt.semilogx(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+##        plt.semilogx(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
 ##        plt.semilogx(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
 ##    elif LOGLOG:
 ##        filename+='.loglog'
-##        plt.loglog(dvals_p, noplusvals, color='b', label='Prior Knowledge')
+##        plt.loglog(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
 ##        plt.loglog(dvals_pa, noplusvals, color='b', linestyle='--')
-##        plt.loglog(dvals_np, noplusvals, color='r', label='No Prior Knowledge')
+##        plt.loglog(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
 ##        plt.loglog(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
 ##    plt.xlabel('IWA (rad)'); plt.ylabel('Exo-Earth Yield')
 ##    plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
@@ -633,26 +633,26 @@ if NOPLUSvT:
     tvals_np = T_photon_noprior(noplusvals, l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
     ax = plt.figure()
     if LINEAR:
-        plt.plot(noplusvals, d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
-        plt.plot(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.plot(noplusvals, d(tvals_p,3600*24*365), color='b', label='Precursor Knowledge')
+        plt.plot(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
         plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
         plt.plot(Noplus,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGY:
         filename+='.logy'
-        plt.semilogy(noplusvals, d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
-        plt.semilogy(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.semilogy(noplusvals, d(tvals_p,3600*24*365), color='b', label='Precursor Knowledge')
+        plt.semilogy(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
         plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
         plt.semilogy(Noplus,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(noplusvals, d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
-        plt.semilogx(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.semilogx(noplusvals, d(tvals_p,3600*24*365), color='b', label='Precursor Knowledge')
+        plt.semilogx(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
         plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
         plt.semilogx(Noplus,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGLOG or UNSET:
         filename+='.loglog'
-        plt.loglog(noplusvals, d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
-        plt.loglog(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.loglog(noplusvals, d(tvals_p,3600*24*365), color='b', label='Precursor Knowledge')
+        plt.loglog(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
         plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
         plt.loglog(Noplus,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Survey duration (years)'); plt.xlabel('Exo-Earth Yield')
@@ -672,20 +672,20 @@ if ETAvT:
     ax = plt.figure()
     plt.xlim([0,1])
     if LINEAR:
-        plt.plot(etavals,d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
-        plt.plot(etavals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.plot(etavals,d(tvals_p,3600*24*365), color='b', label='Precursor Knowledge')
+        plt.plot(etavals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
     elif LOGY or UNSET:
         filename+='.logy'
-        plt.semilogy(etavals,d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
-        plt.semilogy(etavals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.semilogy(etavals,d(tvals_p,3600*24*365), color='b', label='Precursor Knowledge')
+        plt.semilogy(etavals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(etavals,d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
-        plt.semilogx(etavals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.semilogx(etavals,d(tvals_p,3600*24*365), color='b', label='Precursor Knowledge')
+        plt.semilogx(etavals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
     elif LOGLOG:
         filename+='.loglog'
-        plt.loglog(etavals,d(tvals_p,3600*24*365), color='b', label='Prior Knowledge')
-        plt.loglog(etavals, d(tvals_np,3600*24*365), color='r', label='No Prior Knowledge')
+        plt.loglog(etavals,d(tvals_p,3600*24*365), color='b', label='Precursor Knowledge')
+        plt.loglog(etavals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
     plt.axvline(x=minetaval, color='y', linestyle='--',label='$s_c=a$ limit on $\eta_\oplus$')
     plt.plot(etaearth,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Survey duration (years)'); plt.xlabel('$\eta_\oplus$')
@@ -712,20 +712,20 @@ if SNR0vNOPLUS:
     noplus_p = [min(noplus_pp[i], noplus_ip[i], noplus_limit) for i in range(len(snrvals))]
     ax = plt.figure()
     if LINEAR:
-        plt.plot(snrvals, noplus_p, color='b', label='Prior Knowledge')
-        plt.plot(snrvals, noplus_np, color='r', label='No Prior Knowledge')
+        plt.plot(snrvals, noplus_p, color='b', label='Precursor Knowledge')
+        plt.plot(snrvals, noplus_np, color='r', label='No Precursor Knowledge')
     elif LOGY or UNSET:
         filename+='.logy'
-        plt.semilogy(snrvals, noplus_p, color='b', label='Prior Knowledge')
-        plt.semilogy(snrvals, noplus_np, color='r', label='No Prior Knowledge')
+        plt.semilogy(snrvals, noplus_p, color='b', label='Precursor Knowledge')
+        plt.semilogy(snrvals, noplus_np, color='r', label='No Precursor Knowledge')
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(snrvals, noplus_p, color='b', label='Prior Knowledge')
-        plt.semilogx(snrvals, noplus_np, color='r', label='No Prior Knowledge')
+        plt.semilogx(snrvals, noplus_p, color='b', label='Precursor Knowledge')
+        plt.semilogx(snrvals, noplus_np, color='r', label='No Precursor Knowledge')
     elif LOGLOG:
         filename+='.loglog'
-        plt.loglog(snrvals, noplus_p, color='b', label='Prior Knowledge')
-        plt.loglog(snrvals, noplus_np, color='r', label='No Prior Knowledge')
+        plt.loglog(snrvals, noplus_p, color='b', label='Precursor Knowledge')
+        plt.loglog(snrvals, noplus_np, color='r', label='No Precursor Knowledge')
     plt.plot(snr0, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.xlabel('$SNR_0$'); plt.ylabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
@@ -746,21 +746,21 @@ if ETAvNOPLUS:
     ax = plt.figure()
     plt.xlim([0,1])
     if LINEAR or UNSET:
-        plt.plot(etavals,nvals_p, color='b', label='Prior Knowledge')
-        plt.plot(etavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.plot(etavals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.plot(etavals, nvals_np, color='r', label='No Precursor Knowledge')
         plt.gca().set_ylim(bottom=0)
     elif LOGY:
         filename+='.logy'
-        plt.semilogy(etavals,nvals_p, color='b', label='Prior Knowledge')
-        plt.semilogy(etavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogy(etavals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogy(etavals, nvals_np, color='r', label='No Precursor Knowledge')
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(etavals,nvals_p, color='b', label='Prior Knowledge')
-        plt.semilogx(etavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogx(etavals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogx(etavals, nvals_np, color='r', label='No Precursor Knowledge')
     elif LOGLOG:
         filename+='.loglog'
-        plt.loglog(etavals,nvals_p, color='b', label='Prior Knowledge')
-        plt.loglog(etavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.loglog(etavals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.loglog(etavals, nvals_np, color='r', label='No Precursor Knowledge')
     plt.plot(etaearth,Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Survey Yield'); plt.xlabel('$\eta_\oplus$')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
@@ -779,22 +779,22 @@ if EPSvNOPLUS:
     nvals_ip=Noplus_iwa_prior(dvar, l, avar, rhostar, etaearth, snr0, R, K, epsvals, T, iwafac, rval)
     nvals_p = [min(nvals_pp[i], nvals_ip[i], noplus_limit) for i in range(len(nvals_ip))]
     if LINEAR or UNSET:
-        plt.plot(epsvals,nvals_p, color='b', label='Prior Knowledge')
-        plt.plot(epsvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.plot(epsvals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.plot(epsvals, nvals_np, color='r', label='No Precursor Knowledge')
         plt.gca().set_ylim(bottom=0)
         plt.xlim([0,1])
     elif LOGY:
         filename+='.logy'
-        plt.semilogy(epsvals,nvals_p, color='b', label='Prior Knowledge')
-        plt.semilogy(epsvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogy(epsvals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogy(epsvals, nvals_np, color='r', label='No Precursor Knowledge')
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(epsvals,nvals_p, color='b', label='Prior Knowledge')
-        plt.semilogx(epsvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogx(epsvals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogx(epsvals, nvals_np, color='r', label='No Precursor Knowledge')
     elif LOGLOG:
         filename+='.loglog'
-        plt.loglog(epsvals,nvals_p, color='b', label='Prior Knowledge')
-        plt.loglog(epsvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.loglog(epsvals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.loglog(epsvals, nvals_np, color='r', label='No Precursor Knowledge')
     
     plt.plot(eps, Noplus, 'go', label='Assumption', markersize=3)
     currlim=plt.ylim(); plt.ylim([currlim[0], max(currlim[1], Noplus+3)])
@@ -816,21 +816,21 @@ if IWAFACvNOPLUS:
     nvals_p = [min(nvals_pp[i], nvals_ip[i], noplus_limit[i]) for i in range(len(nvals_ip))]
     ax = plt.figure()
     if LINEAR or UNSET:
-        plt.plot(iwavals,nvals_p, color='b', label='Prior Knowledge')
-        plt.plot(iwavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.plot(iwavals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.plot(iwavals, nvals_np, color='r', label='No Precursor Knowledge')
         plt.gca().set_ylim(bottom=0)
     elif LOGY:
         filename+='.logy'
-        plt.semilogy(iwavals,nvals_p, color='b', label='Prior Knowledge')
-        plt.semilogy(iwavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogy(iwavals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogy(iwavals, nvals_np, color='r', label='No Precursor Knowledge')
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(iwavals,nvals_p, color='b', label='Prior Knowledge')
-        plt.semilogx(iwavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogx(iwavals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogx(iwavals, nvals_np, color='r', label='No Precursor Knowledge')
     elif LOGLOG:
         filename+='.loglog'
-        plt.loglog(iwavals,nvals_p, color='b', label='Prior Knowledge')
-        plt.loglog(iwavals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.loglog(iwavals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.loglog(iwavals, nvals_np, color='r', label='No Precursor Knowledge')
     
     plt.plot(iwafac, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Survey Yield'); plt.xlabel('IWA ($\lambda$/d)')
@@ -851,21 +851,21 @@ if CONTRASTvNOPLUS:
     nvals_p = [min(nvals_pp[i], nvals_ip[i], noplus_limit) for i in range(len(nvals_ip))]
     ax = plt.figure()
     if LINEAR or UNSET:
-        plt.plot(kvals,nvals_p, color='b', label='Prior Knowledge')
-        plt.plot(kvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.plot(kvals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.plot(kvals, nvals_np, color='r', label='No Precursor Knowledge')
         plt.gca().set_ylim(bottom=0)
     elif LOGY:
         filename+='.logy'
-        plt.semilogy(kvals,nvals_p, color='b', label='Prior Knowledge')
-        plt.semilogy(kvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogy(kvals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogy(kvals, nvals_np, color='r', label='No Precursor Knowledge')
     elif LOGX:
         filename+='.logx'
-        plt.semilogx(kvals,nvals_p, color='b', label='Prior Knowledge')
-        plt.semilogx(kvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.semilogx(kvals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.semilogx(kvals, nvals_np, color='r', label='No Precursor Knowledge')
     elif LOGLOG:
         filename+='.loglog'
-        plt.loglog(kvals,nvals_p, color='b', label='Prior Knowledge')
-        plt.loglog(kvals, nvals_np, color='r', label='No Prior Knowledge')
+        plt.loglog(kvals,nvals_p, color='b', label='Precursor Knowledge')
+        plt.loglog(kvals, nvals_np, color='r', label='No Precursor Knowledge')
     
     plt.plot(K, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Survey Yield'); plt.xlabel('Flux Contrast Ratio')
