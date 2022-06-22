@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # A little script to generate all my HabEx graphs.
-cd ~/Pictures/dgraphs
+#cd ~/Pictures/dgraphs
 ./dgraphs.py habex 0 linear save
 ./dgraphs.py habex 0 logx save
 ./dgraphs.py habex 0 logy save

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # A little script to generate all my LUVOIR graphs.
-cd ~/Pictures/dgraphs
+#cd ~/Pictures/dgraphs
 ./dgraphs.py luvoir 0 linear savepgf
 ./dgraphs.py luvoir 0 logx savepgf
 ./dgraphs.py luvoir 0 logy savepgf

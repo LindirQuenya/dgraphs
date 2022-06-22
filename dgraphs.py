@@ -499,30 +499,31 @@ if DvNOPLUS:
     ax = plt.figure()
     if LINEAR or UNSET:
         plt.plot(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
-        plt.plot(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.plot(dvals_pa, noplusvals, color='b', linestyle='--', label='Precursor Knowledge, non-limiting factors.')
         plt.plot(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
         plt.plot(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGY:
         filename+='.logy'
         plt.semilogy(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
-        plt.semilogy(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.semilogy(dvals_pa, noplusvals, color='b', linestyle='--', label='Precursor Knowledge, non-limiting factors.')
         plt.semilogy(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
         plt.semilogy(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGX:
         filename+='.logx'
         plt.semilogx(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
-        plt.semilogx(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.semilogx(dvals_pa, noplusvals, color='b', linestyle='--', label='Precursor Knowledge, non-limiting factors.')
         plt.semilogx(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
         plt.semilogx(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     elif LOGLOG:
         filename+='.loglog'
         plt.loglog(dvals_p, noplusvals, color='b', label='Precursor Knowledge')
-        plt.loglog(dvals_pa, noplusvals, color='b', linestyle='--')
+        plt.loglog(dvals_pa, noplusvals, color='b', linestyle='--', label='Precursor Knowledge, non-limiting factors.')
         plt.loglog(dvals_np, noplusvals, color='r', label='No Precursor Knowledge')
         plt.loglog(dvar, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
 
     plt.xlabel('Telescope Diameter (m)'); plt.ylabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    plt.axvline(x=dvals_p[np.where(noplusvals == noplus_intersect)[0][0]], color='k', linestyle=':', label='IWA-Photon intersection (prior)')
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
     plt.legend(prop={'size':6})
     filename+=fileext
@@ -570,6 +571,7 @@ if DvTIME:
         plt.loglog(timevalsy, dvals_np, color='r', label='No Precursor Knowledge')
         plt.loglog(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Telescope Diameter (m)'); plt.xlabel('Survey Duration (years)')
+    plt.axvline(x=tintersect/(3600*24*365), color='k', linestyle=':', label='Photon-IWA intersection (prior)')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
     plt.legend(prop={'size':6})
@@ -728,6 +730,8 @@ if SNR0vNOPLUS:
         plt.loglog(snrvals, noplus_np, color='r', label='No Precursor Knowledge')
     plt.plot(snr0, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.xlabel('$SNR_0$'); plt.ylabel('Exo-Earth Yield')
+    noplus_intersect = max(set(noplus_p) & set(noplus_pp))
+    plt.axvline(x=snrvals[min(min(np.where(noplus_p == noplus_intersect)))], color='k', linestyle=':', label='IWA-Photon intersection (prior)')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     plt.legend(prop={'size':6})
     filename+=fileext
@@ -800,6 +804,8 @@ if EPSvNOPLUS:
     currlim=plt.ylim(); plt.ylim([currlim[0], max(currlim[1], Noplus+3)])
     plt.ylabel('Survey Yield'); plt.xlabel('Survey Efficiency')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    noplus_intersect = max(set(nvals_p) & set(nvals_pp))
+    plt.axvline(x=epsvals[min(min(np.where(nvals_p == noplus_intersect)))], color='k', linestyle=':', label='Photon-IWA intersection (prior)')
     plt.legend(prop={'size':6})
     filename+=fileext
     savepath/=filename
@@ -813,7 +819,8 @@ if IWAFACvNOPLUS:
     nvals_np=Noplus_photon_noprior(dvar, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwavals, rval)
     nvals_pp=Noplus_photon_prior(dvar, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwavals, rval)
     nvals_ip=Noplus_iwa_prior(dvar, l, avar, rhostar, etaearth, snr0, R, K, eps, T, iwavals, rval)
-    nvals_p = [min(nvals_pp[i], nvals_ip[i], noplus_limit[i]) for i in range(len(nvals_ip))]
+    nvals_p = [min(nvals_pp[i], nvals_ip[i], noplus_limit[i]
+) for i in range(len(nvals_ip))]
     ax = plt.figure()
     if LINEAR or UNSET:
         plt.plot(iwavals,nvals_p, color='b', label='Precursor Knowledge')
@@ -835,6 +842,9 @@ if IWAFACvNOPLUS:
     plt.plot(iwafac, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Survey Yield'); plt.xlabel('IWA ($\lambda$/d)')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
+    intersect_y = max(set(nvals_p) & set(noplus_limit))
+    intersect_x = iwavals[min(min(np.where(noplus_limit == intersect_y)))]
+    plt.axvline(x=intersect_x, color='k', linestyle=':', label='Photon-IWA intersection (prior)')
     plt.legend(prop={'size':6})
     filename+=fileext
     savepath/=filename

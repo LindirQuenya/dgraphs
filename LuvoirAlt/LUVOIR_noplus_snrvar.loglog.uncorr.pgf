@@ -6,11 +6,9 @@
 %% Make sure the required packages are loaded in your preamble
 %%   \usepackage{pgf}
 %%
-%% and, on pdftex
-%%   \usepackage[utf8]{inputenc}\DeclareUnicodeCharacter{2212}{-}
-%%
-%% or, on luatex and xetex
-%%   \usepackage{unicode-math}
+%% Also ensure that all the required font packages are loaded; for instance,
+%% the lmodern package is sometimes necessary when using math font.
+%%   \usepackage{lmodern}
 %%
 %% Figures using additional raster images can only be included by \input if
 %% they are in the same directory as the main LaTeX file. For loading figures
@@ -22,9 +20,9 @@
 %%
 %% Matplotlib used the following preamble
 %%   \usepackage{fontspec}
-%%   \setmainfont{DejaVuSerif.ttf}[Path=/usr/share/matplotlib/mpl-data/fonts/ttf/]
-%%   \setsansfont{DejaVuSans.ttf}[Path=/usr/share/matplotlib/mpl-data/fonts/ttf/]
-%%   \setmonofont{DejaVuSansMono.ttf}[Path=/usr/share/matplotlib/mpl-data/fonts/ttf/]
+%%   \setmainfont{DejaVuSerif.ttf}[Path=\detokenize{/usr/share/matplotlib/mpl-data/fonts/ttf/}]
+%%   \setsansfont{DejaVuSans.ttf}[Path=\detokenize{/usr/share/matplotlib/mpl-data/fonts/ttf/}]
+%%   \setmonofont{DejaVuSansMono.ttf}[Path=\detokenize{/usr/share/matplotlib/mpl-data/fonts/ttf/}]
 %%
 \begingroup%
 \makeatletter%
@@ -44,6 +42,7 @@
 \pgfpathlineto{\pgfqpoint{6.400000in}{0.000000in}}%
 \pgfpathlineto{\pgfqpoint{6.400000in}{4.800000in}}%
 \pgfpathlineto{\pgfqpoint{0.000000in}{4.800000in}}%
+\pgfpathlineto{\pgfqpoint{0.000000in}{0.000000in}}%
 \pgfpathclose%
 \pgfusepath{fill}%
 \end{pgfscope}%
@@ -61,6 +60,7 @@
 \pgfpathlineto{\pgfqpoint{5.760000in}{0.528000in}}%
 \pgfpathlineto{\pgfqpoint{5.760000in}{4.224000in}}%
 \pgfpathlineto{\pgfqpoint{0.800000in}{4.224000in}}%
+\pgfpathlineto{\pgfqpoint{0.800000in}{0.528000in}}%
 \pgfpathclose%
 \pgfusepath{fill}%
 \end{pgfscope}%
@@ -1071,6 +1071,7 @@
 \pgfpathcurveto{\pgfqpoint{-0.018638in}{0.010825in}}{\pgfqpoint{-0.020833in}{0.005525in}}{\pgfqpoint{-0.020833in}{0.000000in}}%
 \pgfpathcurveto{\pgfqpoint{-0.020833in}{-0.005525in}}{\pgfqpoint{-0.018638in}{-0.010825in}}{\pgfqpoint{-0.014731in}{-0.014731in}}%
 \pgfpathcurveto{\pgfqpoint{-0.010825in}{-0.018638in}}{\pgfqpoint{-0.005525in}{-0.020833in}}{\pgfqpoint{0.000000in}{-0.020833in}}%
+\pgfpathlineto{\pgfqpoint{0.000000in}{-0.020833in}}%
 \pgfpathclose%
 \pgfusepath{stroke,fill}%
 }%
@@ -1078,6 +1079,19 @@
 \pgfsys@transformshift{2.236695in}{3.028337in}%
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfpathrectangle{\pgfqpoint{0.800000in}{0.528000in}}{\pgfqpoint{4.960000in}{3.696000in}}%
+\pgfusepath{clip}%
+\pgfsetbuttcap%
+\pgfsetroundjoin%
+\pgfsetlinewidth{1.505625pt}%
+\definecolor{currentstroke}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{currentstroke}%
+\pgfsetdash{{1.500000pt}{2.475000pt}}{0.000000pt}%
+\pgfpathmoveto{\pgfqpoint{3.067802in}{0.528000in}}%
+\pgfpathlineto{\pgfqpoint{3.067802in}{4.224000in}}%
+\pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetrectcap%
@@ -1134,15 +1148,16 @@
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetstrokeopacity{0.800000}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{4.611269in}{3.790390in}}%
-\pgfpathlineto{\pgfqpoint{5.701667in}{3.790390in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{5.718333in}{3.790390in}}{\pgfqpoint{5.718333in}{3.807057in}}%
+\pgfpathmoveto{\pgfqpoint{4.148949in}{3.668076in}}%
+\pgfpathlineto{\pgfqpoint{5.701667in}{3.668076in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{5.718333in}{3.668076in}}{\pgfqpoint{5.718333in}{3.684743in}}%
 \pgfpathlineto{\pgfqpoint{5.718333in}{4.165667in}}%
 \pgfpathquadraticcurveto{\pgfqpoint{5.718333in}{4.182333in}}{\pgfqpoint{5.701667in}{4.182333in}}%
-\pgfpathlineto{\pgfqpoint{4.611269in}{4.182333in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{4.594603in}{4.182333in}}{\pgfqpoint{4.594603in}{4.165667in}}%
-\pgfpathlineto{\pgfqpoint{4.594603in}{3.807057in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{4.594603in}{3.790390in}}{\pgfqpoint{4.611269in}{3.790390in}}%
+\pgfpathlineto{\pgfqpoint{4.148949in}{4.182333in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{4.132282in}{4.182333in}}{\pgfqpoint{4.132282in}{4.165667in}}%
+\pgfpathlineto{\pgfqpoint{4.132282in}{3.684743in}}%
+\pgfpathquadraticcurveto{\pgfqpoint{4.132282in}{3.668076in}}{\pgfqpoint{4.148949in}{3.668076in}}%
+\pgfpathlineto{\pgfqpoint{4.148949in}{3.668076in}}%
 \pgfpathclose%
 \pgfusepath{stroke,fill}%
 \end{pgfscope}%
@@ -1153,15 +1168,16 @@
 \definecolor{currentstroke}{rgb}{0.000000,0.000000,1.000000}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{4.627936in}{4.114853in}}%
-\pgfpathlineto{\pgfqpoint{4.794603in}{4.114853in}}%
+\pgfpathmoveto{\pgfqpoint{4.165615in}{4.114853in}}%
+\pgfpathlineto{\pgfqpoint{4.248949in}{4.114853in}}%
+\pgfpathlineto{\pgfqpoint{4.332282in}{4.114853in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.861269in,y=4.085686in,left,base]{\color{textcolor}\sffamily\fontsize{6.000000}{7.200000}\selectfont Prior Knowledge}%
+\pgftext[x=4.398949in,y=4.085686in,left,base]{\color{textcolor}\sffamily\fontsize{6.000000}{7.200000}\selectfont Precursor Knowledge}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetrectcap%
@@ -1170,15 +1186,16 @@
 \definecolor{currentstroke}{rgb}{1.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{4.627936in}{3.992538in}}%
-\pgfpathlineto{\pgfqpoint{4.794603in}{3.992538in}}%
+\pgfpathmoveto{\pgfqpoint{4.165615in}{3.992538in}}%
+\pgfpathlineto{\pgfqpoint{4.248949in}{3.992538in}}%
+\pgfpathlineto{\pgfqpoint{4.332282in}{3.992538in}}%
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.861269in,y=3.963372in,left,base]{\color{textcolor}\sffamily\fontsize{6.000000}{7.200000}\selectfont No Prior Knowledge}%
+\pgftext[x=4.398949in,y=3.963372in,left,base]{\color{textcolor}\sffamily\fontsize{6.000000}{7.200000}\selectfont No Precursor Knowledge}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetbuttcap%
@@ -1199,11 +1216,12 @@
 \pgfpathcurveto{\pgfqpoint{-0.018638in}{0.010825in}}{\pgfqpoint{-0.020833in}{0.005525in}}{\pgfqpoint{-0.020833in}{0.000000in}}%
 \pgfpathcurveto{\pgfqpoint{-0.020833in}{-0.005525in}}{\pgfqpoint{-0.018638in}{-0.010825in}}{\pgfqpoint{-0.014731in}{-0.014731in}}%
 \pgfpathcurveto{\pgfqpoint{-0.010825in}{-0.018638in}}{\pgfqpoint{-0.005525in}{-0.020833in}}{\pgfqpoint{0.000000in}{-0.020833in}}%
+\pgfpathlineto{\pgfqpoint{0.000000in}{-0.020833in}}%
 \pgfpathclose%
 \pgfusepath{stroke,fill}%
 }%
 \begin{pgfscope}%
-\pgfsys@transformshift{4.711269in}{3.870224in}%
+\pgfsys@transformshift{4.248949in}{3.870224in}%
 \pgfsys@useobject{currentmarker}{}%
 \end{pgfscope}%
 \end{pgfscope}%
@@ -1211,7 +1229,25 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.861269in,y=3.841057in,left,base]{\color{textcolor}\sffamily\fontsize{6.000000}{7.200000}\selectfont LUVOIR Assumption}%
+\pgftext[x=4.398949in,y=3.841057in,left,base]{\color{textcolor}\sffamily\fontsize{6.000000}{7.200000}\selectfont LUVOIR Assumption}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\pgfsetbuttcap%
+\pgfsetroundjoin%
+\pgfsetlinewidth{1.505625pt}%
+\definecolor{currentstroke}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{currentstroke}%
+\pgfsetdash{{1.500000pt}{2.475000pt}}{0.000000pt}%
+\pgfpathmoveto{\pgfqpoint{4.165615in}{3.747910in}}%
+\pgfpathlineto{\pgfqpoint{4.248949in}{3.747910in}}%
+\pgfpathlineto{\pgfqpoint{4.332282in}{3.747910in}}%
+\pgfusepath{stroke}%
+\end{pgfscope}%
+\begin{pgfscope}%
+\definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
+\pgfsetstrokecolor{textcolor}%
+\pgfsetfillcolor{textcolor}%
+\pgftext[x=4.398949in,y=3.718743in,left,base]{\color{textcolor}\sffamily\fontsize{6.000000}{7.200000}\selectfont IWA-Photon intersection (prior)}%
 \end{pgfscope}%
 \end{pgfpicture}%
 \makeatother%
