@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 
 # First one uses script location, second uses cwd. Comment/uncomment to taste.
-mpl.rcParams["savefig.directory"] = os.chdir(os.path.dirname(__file__))
+mpl.rcParams["savefig.directory"] = os.path.realpath(os.path.dirname(__file__))
 #mpl.rcParams["savefig.directory"] = ""
 
 # The following specifies that titles should be on/off for figures.
