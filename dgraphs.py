@@ -543,7 +543,7 @@ if DvTIME:
     timevals = np.concatenate([timevals, tval2, tval3])
     timevals = np.sort(timevals)
     timevalsy = d(timevals, 3600*24*365)
-    titlestr = ' Telescope Diameter vs. Survey Duration, for $\eta_\oplus='+str(float(etaearth))+'$.'
+    titlestr = ' Telescope Diameter vs. Total On-sky Time, for $\eta_\oplus='+str(float(etaearth))+'$.'
     dvals_p, dvals_pa = d_prior_T(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, timevals, iwafac, rval)
     dvals_np = d_photon_noprior(Noplus, l, avar, rhostar, etaearth, snr0, R, K, eps, timevals, iwafac, rval)
     ax = plt.figure()
@@ -570,7 +570,7 @@ if DvTIME:
         plt.loglog(timevalsy, dvals_p, color='b', linestyle='--')
         plt.loglog(timevalsy, dvals_np, color='r', label='No Precursor Knowledge')
         plt.loglog(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    plt.ylabel('Telescope Diameter (m)'); plt.xlabel('Survey Duration (years)')
+    plt.ylabel('Telescope Diameter (m)'); plt.xlabel('Total On-sky Time (years)')
     plt.axvline(x=tintersect/(3600*24*365), color='k', linestyle=':', label='Photon-IWA intersection (prior)')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
@@ -625,7 +625,7 @@ if DvTIME:
 
 if NOPLUSvT:
     filename+='T_noplusvar'
-    titlestr = ' Yield vs. Survey Duration, for $\eta_\oplus='+str(float(etaearth))+'$.'
+    titlestr = ' Yield vs. Total On-sky Time, for $\eta_\oplus='+str(float(etaearth))+'$.'
     noplus_limit = get_Noplus_sca([], l, avar, rhostar, etaearth, snr0, R, K, eps, dvar, iwafac, rval)
     noplusvals = list(range(1,int(noplus_limit)-2))
     #Aggressively sample near the asymptote, to give it better clarity.
@@ -657,7 +657,7 @@ if NOPLUSvT:
         plt.loglog(noplusvals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
         plt.axvline(x=noplus_limit, color='y', linestyle='--',label='$s_c=a$ limit on $N_\oplus$')
         plt.loglog(Noplus,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    plt.ylabel('Survey duration (years)'); plt.xlabel('Exo-Earth Yield')
+    plt.ylabel('Total On-sky Time (years)'); plt.xlabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     plt.legend(prop={'size':6})
     filename+=fileext
@@ -690,7 +690,7 @@ if ETAvT:
         plt.loglog(etavals, d(tvals_np,3600*24*365), color='r', label='No Precursor Knowledge')
     plt.axvline(x=minetaval, color='y', linestyle='--',label='$s_c=a$ limit on $\eta_\oplus$')
     plt.plot(etaearth,T/(3600*24*365), 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
-    plt.ylabel('Survey duration (years)'); plt.xlabel('$\eta_\oplus$')
+    plt.ylabel('Total On-sky Time (years)'); plt.xlabel('$\eta_\oplus$')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     plt.legend(prop={'size':6})
     filename+=fileext
