@@ -163,7 +163,7 @@ h=npf64("6.62607015e-27")      # Planck's constant,            in erg-seconds
 c=npf64('299792458')           # Speed of light,               in meters/second
 k=npf64("1.380649e-16")        # Boltzmann constant,           in erg-kelvins
 l=npf64("5e-7")                # Middle wavelength~=500nm,     in meters
-temp=npf64('5778')             # Solar temperature=5778K,      in kelvins
+temp=npf64('5772')             # Solar temperature=5772K,      in kelvins
 r=npf64('695700e+3')           # Solar radius,                 in meters
 avar=npf64('1.496e+11')        # Exo-earth orbital radius=1AU, in meters
 etaearth=npf64('0.24')         # Eta-earth (Belikov 2017),     in unitless + (Kopparapu et al. 2018)
