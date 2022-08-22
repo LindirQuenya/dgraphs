@@ -183,7 +183,7 @@ if HABEX:
     eps=npf64('0.5')           # Observatory efficiency,       in unitless
     dvar=npf64('4.0')          # HabEx primary diameter,       in meters
     iwafac=npf64('3')          # iwa=3 l/d, iwafac=3,          in unitless
-    Noplus=npf64('20')         # Target Exo-Earth yield,       in unitless No-precursor
+    Noplus=npf64('8')          # Target Exo-Earth yield,       in unitless No-precursor
     snr0=npf64('7')            # Target signal-to-noise ratio, in unitless
 
 # For LUVOIR mission concept: Sig. Sci. Case #1.
@@ -431,7 +431,7 @@ if NOPLUSvD:
         plt.loglog(Noplus, dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Properties', markersize=3)
         plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
     # plt.axvline(x=Noplus, color='g', linestyle='--', label=HABEX*'HabEx' + LUVOIR*'LUVOIR'+' Expected Yield')
-    plt.axvline(x=noplus_intersect, color='k', linestyle=':', label='IWA-Photon intersection (prior)')
+    plt.axvline(x=noplus_intersect, color='k', linestyle=':', label='IWA-Photon intersection (precursor)')
     #plt.figtext(0.45, 0.23, 'IWA-Limited', fontsize=8);plt.figtext(0.74, 0.23, 'Photon-Limited', fontsize=8)
     # plt.axhline(y=dvar, color='c', linestyle='--', label=HABEX*'HabEx' + LUVOIR*'LUVOIR'+' Telescope Diameter')
     plt.ylabel('Minimum Telescope Diameter (m)'); plt.xlabel('EEC/HEC Yield')
@@ -523,7 +523,7 @@ if DvNOPLUS:
 
     plt.xlabel('Telescope Diameter (m)'); plt.ylabel('Exo-Earth Yield')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
-    plt.axvline(x=dvals_p[np.where(noplusvals == noplus_intersect)[0][0]], color='k', linestyle=':', label='IWA-Photon intersection (prior)')
+    plt.axvline(x=dvals_p[np.where(noplusvals == noplus_intersect)[0][0]], color='k', linestyle=':', label='IWA-Photon intersection (precursor)')
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
     plt.legend(prop={'size':6})
     filename+=fileext
@@ -571,7 +571,7 @@ if DvTIME:
         plt.loglog(timevalsy, dvals_np, color='r', label='No Precursor Knowledge')
         plt.loglog(T/(3600*24*365), dvar, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.ylabel('Telescope Diameter (m)'); plt.xlabel('Total On-sky Time (years)')
-    plt.axvline(x=tintersect/(3600*24*365), color='k', linestyle=':', label='Photon-IWA intersection (prior)')
+    plt.axvline(x=tintersect/(3600*24*365), color='k', linestyle=':', label='Photon-IWA intersection (precursor)')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     # currlim=plt.ylim(); plt.ylim([currlim[0], 25])
     plt.legend(prop={'size':6})
@@ -731,7 +731,7 @@ if SNR0vNOPLUS:
     plt.plot(snr0, Noplus, 'go', label=HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR'+' Assumption', markersize=3)
     plt.xlabel('$SNR_0$'); plt.ylabel('Exo-Earth Yield')
     noplus_intersect = max(set(noplus_p) & set(noplus_pp))
-    plt.axvline(x=snrvals[min(min(np.where(noplus_p == noplus_intersect)))], color='k', linestyle=':', label='IWA-Photon intersection (prior)')
+    plt.axvline(x=snrvals[min(min(np.where(noplus_p == noplus_intersect)))], color='k', linestyle=':', label='IWA-Photon intersection (precursor)')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     plt.legend(prop={'size':6})
     filename+=fileext
@@ -805,7 +805,7 @@ if EPSvNOPLUS:
     plt.ylabel('Survey Yield'); plt.xlabel('Survey Efficiency')
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     noplus_intersect = max(set(nvals_p) & set(nvals_pp))
-    plt.axvline(x=epsvals[min(min(np.where(nvals_p == noplus_intersect)))], color='k', linestyle=':', label='Photon-IWA intersection (prior)')
+    plt.axvline(x=epsvals[min(min(np.where(nvals_p == noplus_intersect)))], color='k', linestyle=':', label='Photon-IWA intersection (precursor)')
     plt.legend(prop={'size':6})
     filename+=fileext
     savepath/=filename
@@ -844,7 +844,7 @@ if IWAFACvNOPLUS:
     plt.title(TITLES*(HABEX*'HabEx' + (LUVOIR or LUVOIRALT)*'LUVOIR' + titlestr))
     intersect_y = max(set(nvals_p) & set(noplus_limit))
     intersect_x = iwavals[min(min(np.where(noplus_limit == intersect_y)))]
-    plt.axvline(x=intersect_x, color='k', linestyle=':', label='Photon-IWA intersection (prior)')
+    plt.axvline(x=intersect_x, color='k', linestyle=':', label='Photon-IWA intersection (precursor)')
     plt.legend(prop={'size':6})
     filename+=fileext
     savepath/=filename
